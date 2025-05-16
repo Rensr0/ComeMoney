@@ -196,34 +196,85 @@ button:hover {
 }
 
 /* 统一卡片样式 */
-.card-base {
+.stat-card {
     background: var(--card-bg);
     border-radius: 15px;
-    padding: clamp(10px, 2vw, 15px);
-    margin-bottom: 15px;
-    box-shadow: 0 3px 10px var(--shadow-color);
-    border: 2px solid var(--border-color);
+    padding: clamp(10px, 3vw, 15px);
     display: flex;
     align-items: center;
-    gap: 15px;
+    gap: 12px;
+    box-shadow: 0 5px 15px var(--shadow-color);
+    transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
+    border: 2px solid var(--border-color);
 }
 
-/* 卡片图标通用样式 */
-.card-icon {
-    width: 50px;
-    height: 50px;
+.stat-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px var(--shadow-color);
+    background: var(--card-bg-hover);
+}
+
+.stat-icon {
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
     border-radius: 50%;
     background: var(--tip-bg);
     display: flex;
     align-items: center;
     justify-content: center;
-    flex-shrink: 0;
+    color: white;
+    box-shadow: 0 3px 8px var(--primary-btn-shadow);
 }
 
-.card-icon i {
+.stat-icon i {
     color: var(--highlight-color);
-    font-size: 1.5rem;
+    font-size: 1.2rem;
     margin: 0;
+}
+
+.stat-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+}
+
+.stat-value {
+    font-size: clamp(1.1rem, 3vw, 1.5rem);
+    font-weight: 700;
+    color: var(--highlight-color);
+}
+
+.stat-label {
+    font-size: clamp(0.7rem, 2vw, 0.9rem);
+    color: var(--text-color-light);
+    font-weight: 500;
+}
+
+/* 统计卡片布局 */
+.stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+/* 特殊样式 - 假期日期显示 */
+#holidayDate {
+    font-size: clamp(0.65rem, 1.8vw, 0.8rem);
+    color: var(--text-color-lighter);
+}
+
+/* 特殊样式 - 保持今日收入显示大小 */
+.today-earned {
+    font-size: clamp(2rem, 6vw, 3rem);
+    font-weight: 800;
+    color: var(--highlight-color);
+    margin: 15px 0;
+    text-shadow: 2px 2px 4px var(--shadow-color);
 }
 
 /* 卡片内容样式 */
@@ -269,176 +320,6 @@ button:hover {
     margin: 15px 0;
 }
 
-.stat-card {
-    background: var(--card-bg);
-    border-radius: 15px;
-    padding: clamp(8px, 2vw, 15px);
-    box-shadow: 0 3px 10px var(--shadow-color);
-    border: 2px solid var(--border-color);
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.stat-icon {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background: var(--tip-bg);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-}
-
-.stat-icon i {
-    color: var(--highlight-color);
-    font-size: 1.2rem;
-    margin: 0;
-}
-
-.stat-info {
-    flex-grow: 1;
-    text-align: center;
-}
-
-.stat-value {
-    font-size: clamp(1.1rem, 3.5vw, 1.5rem);
-    font-weight: 700;
-    color: var(--highlight-color);
-}
-
-.stat-label {
-    font-size: clamp(0.7rem, 2vw, 0.9rem);
-    color: var(--text-color-lighter);
-    margin-top: 5px;
-}
-
-/* 扩展统计卡片样式 */
-.extended-stats {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 15px;
-    margin-bottom: 20px;
-}
-
-.extended-stat-card {
-    background: var(--card-bg);
-    border-radius: 15px;
-    padding: clamp(10px, 2vw, 15px);
-    box-shadow: 0 3px 10px var(--shadow-color);
-    border: 2px solid var(--border-color);
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.extended-stat-icon {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background: var(--tip-bg);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-}
-
-.extended-stat-icon i {
-    color: var(--highlight-color);
-    font-size: 1.2rem;
-    margin: 0;
-}
-
-.extended-stat-info {
-    flex-grow: 1;
-    text-align: center;
-}
-
-.extended-stat-label {
-    font-size: clamp(0.8rem, 2vw, 1rem);
-    color: var(--text-color-light);
-    margin-bottom: 5px;
-}
-
-.extended-stat-value {
-    font-size: clamp(1.3rem, 4vw, 1.8rem);
-    font-weight: 700;
-    color: var(--highlight-color);
-}
-
-/* 倒计时容器样式 */
-.countdown-container {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: clamp(8px, 2vw, 15px);
-    margin: 15px 0;
-}
-
-/* 假期倒计时样式 */
-.holiday-countdown {
-    background: var(--card-bg);
-    border-radius: 15px;
-    padding: clamp(10px, 2vw, 15px);
-    box-shadow: 0 3px 10px var(--shadow-color);
-    border: 2px solid var(--border-color);
-    display: flex;
-    align-items: center;
-    gap: 15px;
-}
-
-.countdown-container .holiday-countdown {
-    margin-bottom: 0;
-}
-
-.holiday-icon {
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    background: var(--tip-bg);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-}
-
-.holiday-icon i {
-    color: var(--highlight-color);
-    font-size: 1.5rem;
-    margin: 0;
-}
-
-.holiday-info {
-    flex-grow: 1;
-    text-align: center;
-}
-
-.holiday-title {
-    font-size: clamp(0.9rem, 2.5vw, 1.1rem);
-    color: var(--text-color);
-    margin-bottom: 5px;
-}
-
-.holiday-days {
-    font-size: clamp(1.5rem, 5vw, 2rem);
-    font-weight: 700;
-    color: var(--highlight-color);
-}
-
-.holiday-date {
-    font-size: clamp(0.8rem, 2vw, 0.9rem);
-    color: var(--text-color-lighter);
-    margin-top: 3px;
-}
-
-.today-earned {
-    font-size: clamp(2rem, 7vw, 3.5rem);
-    font-weight: 700;
-    color: var(--highlight-color);
-    margin: 10px 0;
-    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
-}
-
 .progress-container {
     background: var(--progress-bg);
     border-radius: 50px;
@@ -468,6 +349,22 @@ button:hover {
 }
 
 .motivation i {
+    color: var(--border-color);
+    margin-right: 10px;
+}
+
+.notice {
+    background: var(--tip-bg);
+    border-left: 4px solid var(--border-color);
+    padding: clamp(10px, 2vw, 15px);
+    border-radius: 0 15px 15px 0;
+    margin-bottom: 15px;
+    font-style: italic;
+    font-size: clamp(0.8rem, 2.5vw, 1rem);
+    color: var(--text-color-light);
+}
+
+.notice i {
     color: var(--border-color);
     margin-right: 10px;
 }

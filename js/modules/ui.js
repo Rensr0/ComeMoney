@@ -296,7 +296,7 @@ export function updateHolidayInfo(holidayInfo) {
     const { name, date, daysLeft } = holidayInfo;
     
     // 获取假期卡片元素
-    const holidayCountdown = holidayDaysElement.closest('.holiday-countdown');
+    const holidayCountdown = holidayDaysElement.closest('.stat-card');
     
     // 更新假期名称
     holidayNameElement.textContent = name || '下个假期';
@@ -312,13 +312,13 @@ export function updateHolidayInfo(holidayInfo) {
             holidayCountdown.classList.add('holiday-today');
             
             // 修改标题文案
-            const holidayTitle = holidayCountdown.querySelector('.holiday-title');
+            const holidayTitle = holidayCountdown.querySelector('.stat-label');
             if (holidayTitle) {
                 holidayTitle.innerHTML = `今天就是<span id="holidayName">${name}，</span>`;
             }
             
             // 修改图标颜色
-            const holidayIcon = holidayCountdown.querySelector('.holiday-icon i');
+            const holidayIcon = holidayCountdown.querySelector('.stat-icon i');
             if (holidayIcon) {
                 holidayIcon.style.color = '#ff7e5f';
             }
@@ -333,13 +333,13 @@ export function updateHolidayInfo(holidayInfo) {
             holidayCountdown.classList.remove('holiday-today');
             
             // 恢复默认标题文案
-            const holidayTitle = holidayCountdown.querySelector('.holiday-title');
+            const holidayTitle = holidayCountdown.querySelector('.stat-label');
             if (holidayTitle) {
                 holidayTitle.innerHTML = `距离 <span id="holidayName">${name}</span> 还有：`;
             }
             
             // 恢复图标默认颜色
-            const holidayIcon = holidayCountdown.querySelector('.holiday-icon i');
+            const holidayIcon = holidayCountdown.querySelector('.stat-icon i');
             if (holidayIcon) {
                 holidayIcon.style.color = '';
             }

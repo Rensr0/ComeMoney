@@ -29,17 +29,17 @@
     }
     
     /* 图标尺寸调整 */
-    .stat-icon, .extended-stat-icon, .holiday-icon {
+    .stat-icon {
         width: 35px;
         height: 35px;
     }
     
-    .stat-icon i, .extended-stat-icon i, .holiday-icon i {
+    .stat-icon i {
         font-size: 1rem;
     }
     
     /* 卡片内间距调整 */
-    .stat-card, .extended-stat-card, .holiday-countdown {
+    .stat-card {
         padding: 10px;
         gap: 8px;
     }
@@ -167,38 +167,38 @@
     }
     
     /* 假期倒计时样式调整 */
-    .holiday-countdown {
+    .stat-card {
         padding: 8px;
     }
     
     /* 图标尺寸进一步调整 */
-    .stat-icon, .extended-stat-icon, .holiday-icon {
+    .stat-icon {
         width: 28px;
         height: 28px;
         min-width: 28px; /* 防止图标被压缩 */
     }
     
-    .stat-icon i, .extended-stat-icon i, .holiday-icon i {
+    .stat-icon i {
         font-size: 0.85rem;
     }
     
     /* 字体大小调整 */
-    .stat-value, .extended-stat-value, .holiday-days {
+    .stat-value {
         font-size: clamp(0.9rem, 2.8vw, 1.1rem);
     }
     
-    .stat-label, .extended-stat-label, .holiday-title {
+    .stat-label {
         font-size: clamp(0.65rem, 1.6vw, 0.75rem);
     }
     
     /* 调整卡片间距 */
-    .stat-card, .extended-stat-card, .holiday-countdown {
+    .stat-card {
         padding: 8px;
         gap: 6px;
     }
     
     /* 调整信息区域 */
-    .stat-info, .extended-stat-info, .holiday-info {
+    .stat-info {
         font-size: 0.9rem;
     }
     
@@ -257,21 +257,21 @@
 /* 超小屏幕适配 */
 @media (max-width: 360px) {
     /* 保持布局但调整尺寸 */
-    .stat-icon, .extended-stat-icon, .holiday-icon {
+    .stat-icon {
         width: 24px;
         height: 24px;
         min-width: 24px;
     }
     
-    .stat-icon i, .extended-stat-icon i, .holiday-icon i {
+    .stat-icon i {
         font-size: 0.8rem;
     }
     
-    .stat-value, .extended-stat-value, .holiday-days {
+    .stat-value {
         font-size: clamp(0.8rem, 2.5vw, 1rem);
     }
     
-    .stat-label, .extended-stat-label, .holiday-title {
+    .stat-label {
         font-size: clamp(0.6rem, 1.5vw, 0.7rem);
     }
     
@@ -280,7 +280,7 @@
         gap: 6px;
     }
     
-    .stat-card, .extended-stat-card, .holiday-countdown {
+    .stat-card {
         padding: 6px;
         gap: 4px;
     }

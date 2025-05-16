@@ -39,14 +39,14 @@
 
         <!-- 遮罩层 -->
         <div class="overlay" id="overlay"></div>
-        
+
         <div class="content">
             <!-- 统计页面 -->
             <div id="statsPage" class="page active">
                 <h2 class="section-title"><i class="fas fa-chart-bar"></i> 今日收入统计</h2>
 
                 <div class="money-display">
-                    <p>您今天已经赚了：</p>
+                    <p>您今天已经赚了：</p>     
                     <div class="today-earned">¥ 0.00</div>
                     <p>继续努力！</p>
                 </div>
@@ -60,54 +60,50 @@
                 </div>
 
                 <!-- 倒计时容器 -->
-                <div class="countdown-container">
+                <div class="stats">
                     <!-- 假期倒计时 -->
-                    <div class="holiday-countdown">
-                        <div class="holiday-icon">
+                    <div class="stat-card">
+                        <div class="stat-icon">
                             <i class="fas fa-calendar-alt"></i>
                         </div>
-                        <div class="holiday-info">
-                            <div class="holiday-title">距离 <span id="holidayName">下个假期</span> 还有</div>
-                            <div class="holiday-days" id="holidayDays">--</div>
-                            <div class="holiday-date" id="holidayDate">--</div>
+                        <div class="stat-info">
+                            <div class="stat-label">距离 <span id="holidayName">下个假期</span> 还有</div>
+                            <div class="stat-value" id="holidayDays">--</div>
+                            <div class="stat-label" id="holidayDate">--</div>
                         </div>
                     </div>
-                    
+
                     <!-- 下班时间倒计时 -->
-                    <div class="holiday-countdown">
-                        <div class="holiday-icon">
+                    <div class="stat-card">
+                        <div class="stat-icon">
                             <i class="fas fa-hourglass-half"></i>
                         </div>
-                        <div class="holiday-info">
-                            <div class="holiday-title">距离下班还有</div>
-                            <div class="holiday-days" id="timeToLeave">--:--:--</div>
+                        <div class="stat-info">
+                            <div class="stat-label">距离下班还有</div>
+                            <div class="stat-value" id="timeToLeave">--:--:--</div>
                         </div>
                     </div>
-                </div>
 
-                <!-- 添加月收入和年收入显示 -->
-                <div class="extended-stats">
-                    <div class="extended-stat-card">
-                        <div class="extended-stat-icon">
+                    <!-- 添加月收入和年收入显示 -->
+                    <div class="stat-card">
+                        <div class="stat-icon">
                             <i class="fas fa-calendar"></i>
                         </div>
-                        <div class="extended-stat-info">
-                            <div class="extended-stat-label">今年已赚</div>
-                            <div class="extended-stat-value" id="yearEarned">¥ 0.00</div>
+                        <div class="stat-info">
+                            <div class="stat-label">今年已赚</div>
+                            <div class="stat-value" id="yearEarned">¥ 0.00</div>
                         </div>
                     </div>
-                    <div class="extended-stat-card">
-                        <div class="extended-stat-icon">
+                    <div class="stat-card">
+                        <div class="stat-icon">
                             <i class="fas fa-calendar-alt"></i>
                         </div>
-                        <div class="extended-stat-info">
-                            <div class="extended-stat-label">本月已赚</div>
-                            <div class="extended-stat-value" id="monthEarned">¥ 0.00</div>
+                        <div class="stat-info">
+                            <div class="stat-label">本月已赚</div>
+                            <div class="stat-value" id="monthEarned">¥ 0.00</div>
                         </div>
                     </div>
-                </div>
 
-                <div class="stats">
                     <div class="stat-card">
                         <div class="stat-icon">
                             <i class="fas fa-dollar-sign"></i>
@@ -145,11 +141,11 @@
                         </div>
                     </div>
                 </div>
-                
-                
-                
+
+
+
                 <div class="motivation">
-                    <i class="fas fa-lightbulb"></i> 
+                    <i class="fas fa-lightbulb"></i>
                     <span id="motivationText">每一分钟的努力都在增加您的收入！</span>
                 </div>
             </div>
@@ -163,28 +159,28 @@
                             <label for="monthlySalary"><i class="fas fa-money-bill-wave"></i> 月薪 (元)</label>
                             <input type="number" id="monthlySalary" placeholder="输入您的月薪" value="10000" required>
                         </div>
-                        
+
                         <div class="form-group">
                             <label for="workDays"><i class="fas fa-calendar-alt"></i> 每月工作天数</label>
                             <input type="number" id="workDays" placeholder="输入每月工作天数" value="22" min="1" max="31"
                                 required>
                         </div>
-                        
+
                         <div class="form-group">
                             <label for="startTime"><i class="fas fa-clock"></i> 上班时间</label>
                             <input type="time" id="startTime" value="09:00" required>
                         </div>
-                        
+
                         <div class="form-group">
                             <label for="endTime"><i class="fas fa-clock"></i> 下班时间</label>
                             <input type="time" id="endTime" value="18:00" required>
                         </div>
-                        
+
                         <div class="form-group">
                             <label for="lunchBreak"><i class="fas fa-utensils"></i> 午休时间 (分钟)</label>
                             <input type="number" id="lunchBreak" placeholder="输入午休时间" value="0" min="0" required>
                         </div>
-                        
+
                         <div class="form-group">
                             <label for="decimalPlaces"><i class="fas fa-percentage"></i> 小数位数显示</label>
                             <select id="decimalPlaces">
@@ -195,7 +191,7 @@
                                 <option value="4">4 位小数</option>
                             </select>
                         </div>
-                        
+
                         <div class="form-group full-width">
                             <div class="button-group">
                                 <button type="submit"><i class="fas fa-save"></i> 保存设置并计算</button>
@@ -205,7 +201,7 @@
                         </div>
                     </div>
                 </form>
-                
+
                 <!-- 分享链接区域 -->
                 <div class="share-container" id="shareContainer" style="display: none;">
                     <div class="share-title">
@@ -220,22 +216,27 @@
                     </div>
                 </div>
             </div>
-            
+
             <!-- 关于页面 -->
             <div id="aboutPage" class="page">
                 <h2 class="section-title"><i class="fas fa-info-circle"></i> 关于本应用</h2>
-                
+
+                <div class="notice">
+                    <i class="fas fa-info-circle"></i>
+                    <span id="noticeText">采用本地存储方案，数据仅用于本地计算，全程不上传服务器，严格保障隐私安全。</span>
+                </div>
+
                 <div class="about-container">
                     <div class="version-card">
                         <div class="version-header">
                             <h3>0.0.3</h3>
                             <span class="version-date">2025年5月31日</span>
-                </div>
+                        </div>
                         <div class="version-title">移动端焕新：口袋里的效率神器</div>
                         <div class="version-content">
                             <h4>手机端体验大升级：</h4>
                             <p>重新设计界面布局：手机页面显示更加友好；首页新增快捷卡片，关键信息一目了然。</p>
-                
+
                             <h4>新增三大实用功能：</h4>
                             <ol>
                                 <li>
@@ -251,15 +252,12 @@
                                     <p>输入月薪后，实时计算"当月已赚"和"今年累计收入"，搭配进度条显示，搞钱动力拉满！</p>
                                 </li>
                             </ol>
-                            
-                            <h4>承诺：</h4>
-                            <p>采用本地存储方案，数据仅用于本地计算，全程不上传服务器，严格保障隐私安全。</p>
-                            
+
                             <h4>未来计划：</h4>
                             <p>下一个版本或将加入"番茄钟"和"支出记录"功能，敬请期待！</p>
-                </div>
+                        </div>
                     </div>
-                    
+
                     <div class="version-card">
                         <div class="version-header">
                             <h3>0.0.2</h3>
@@ -270,13 +268,13 @@
                             <h4>暗黑模式来了！</h4>
                             <p>无论是深夜加班还是白天通勤，应用会自动跟随系统主题切换明暗模式，适配你的视觉习惯。</p>
                             <p>深色模式采用低饱和度配色方案，优化界面元素对比度，降低视觉疲劳。</p>
-                            
+
                             <h4>分享你的专属配置：</h4>
                             <p>新增 "分享链接" 功能，可一键生成包含自定义工作参数（如上下班时间、月薪配置）的专属链接。</p>
                             <p>场景举例：和同事约定相同的下班倒计时目标，通过链接快速同步配置，卷王/摸鱼党的必备！</p>
                         </div>
                     </div>
-                    
+
                     <div class="version-card">
                         <div class="version-header">
                             <h3>0.0.1</h3>
@@ -287,13 +285,13 @@
                             <h4>我做了什么：</h4>
                             <p>经过前期构思与需求梳理，明确开发聚焦时间管理与数据可视化的工具类应用，旨在帮助用户直观掌控工作与生活节奏。</p>
                             <p>完成首版原型设计，规划核心功能架构：从基础界面框架搭建，到后续规划的时间、假期、收入等数据展示模块。</p>
-                            
+
                             <h4>你将看到什么：</h4>
                             <p>即将上线简洁主界面，支持基础页面导航与数据入口功能。</p>
                             <p>实现版本可用性验证，用户可体验基础操作流程。</p>
                         </div>
                     </div>
-                    
+
                     <div class="contact-section">
                         <h3>联系我们</h3>
                         <p>若有任何想法和建议均可发送邮箱至：<a href="mailto:admin@rensr.site">admin@rensr.site</a></p>
@@ -303,9 +301,9 @@
         </div>
         <footer>
             <p>
-                <strong>版权声明</strong>：  
+                <strong>版权声明</strong>：
                 本网站所有内容版权归 <a href="https://rensr.site" rel="noopener">任尚仁</a> 所有
-              </p>
+            </p>
         </footer>
     </div>
 
@@ -324,4 +322,4 @@
     <script type="module" src="js/main.js"></script>
 </body>
 
-</html> 
+</html>
