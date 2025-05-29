@@ -173,8 +173,9 @@ function generateShareLink() {
     const configString = JSON.stringify(currentConfig);
     const encodedConfig = btoa(configString);
     
-    // 生成链接
-    const url = new URL(window.location.href);
+    // 使用官方网站URL进行分享，避免使用localhost无法访问
+    const officialBaseUrl = "https://game.rensr.site/come_money/";
+    const url = new URL(officialBaseUrl);
     url.search = `?config=${encodeURIComponent(encodedConfig)}`;
     
     // 显示链接
@@ -207,38 +208,95 @@ function copyShareLink() {
         return;
     }
     
-    // 使用现代剪贴板API
-    navigator.clipboard.writeText(linkText)
-        .then(() => {
-            // 添加复制成功的视觉反馈
-            shareLink.style.backgroundColor = '#f0fff0';
-            shareLink.style.borderColor = '#2ecc71';
-            setTimeout(() => {
-                shareLink.style.backgroundColor = '';
-                shareLink.style.borderColor = '';
-            }, 1000);
-            
-            // 更改复制按钮文本，短暂显示已复制
-            const originalText = copyLinkBtn.innerHTML;
-            copyLinkBtn.innerHTML = '<i class="fas fa-check"></i> 已复制';
-            copyLinkBtn.style.background = 'linear-gradient(to right, #2ecc71, #27ae60)';
-            
-            setTimeout(() => {
-                copyLinkBtn.innerHTML = originalText;
-                copyLinkBtn.style.background = '';
-            }, 2000);
-            
-            showAlert('链接已复制到剪贴板！');
-        })
-        .catch(err => {
-            console.error('复制失败:', err);
+    // 尝试使用现代剪贴板API
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(linkText)
+            .then(() => {
+                showCopySuccess();
+            })
+            .catch(err => {
+                console.error('剪贴板API失败:', err);
+                // 尝试备用方法
+                fallbackCopy(linkText);
+            });
+    } else {
+        // 不支持clipboard API时使用备用方法
+        fallbackCopy(linkText);
+    }
+}
+
+// 备用复制方法
+function fallbackCopy(text) {
+    try {
+        // 创建临时textarea元素
+        const textArea = document.createElement('textarea');
+        textArea.value = text;
+        
+        // 设置样式使元素不可见
+        textArea.style.position = 'fixed';
+        textArea.style.top = '0';
+        textArea.style.left = '0';
+        textArea.style.width = '2em';
+        textArea.style.height = '2em';
+        textArea.style.padding = '0';
+        textArea.style.border = 'none';
+        textArea.style.outline = 'none';
+        textArea.style.boxShadow = 'none';
+        textArea.style.background = 'transparent';
+        textArea.style.opacity = '0';
+        
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        
+        // 尝试执行复制命令
+        const successful = document.execCommand('copy');
+        document.body.removeChild(textArea);
+        
+        if (successful) {
+            showCopySuccess();
+        } else {
             showAlert('复制失败，请手动复制链接。', 'error');
-        });
+        }
+    } catch (err) {
+        console.error('备用复制方法失败:', err);
+        showAlert('复制失败，请长按链接并手动复制。', 'error');
+    }
+}
+
+// 显示复制成功的反馈
+function showCopySuccess() {
+    // 添加复制成功的视觉反馈
+    shareLink.style.backgroundColor = '#f0fff0';
+    shareLink.style.borderColor = '#2ecc71';
+    setTimeout(() => {
+        shareLink.style.backgroundColor = '';
+        shareLink.style.borderColor = '';
+    }, 1000);
+    
+    // 更改复制按钮文本，短暂显示已复制
+    const originalText = copyLinkBtn.innerHTML;
+    copyLinkBtn.innerHTML = '<i class="fas fa-check"></i> 已复制';
+    copyLinkBtn.style.background = 'linear-gradient(to right, #2ecc71, #27ae60)';
+    
+    setTimeout(() => {
+        copyLinkBtn.innerHTML = originalText;
+        copyLinkBtn.style.background = '';
+    }, 2000);
+    
+    showAlert('链接已复制到剪贴板！');
 }
 
 // 显示设置页面
 function showSettingsPage(e) {
     if (e) e.preventDefault();
+    
+    // 清除URL参数，恢复干净的URL
+    if (window.history && window.history.replaceState) {
+        const cleanUrl = window.location.pathname;
+        window.history.replaceState({}, document.title, cleanUrl);
+    }
+    
     settingsPage.classList.add('active');
     statsPage.classList.remove('active');
     settingsBtn.classList.add('active');
