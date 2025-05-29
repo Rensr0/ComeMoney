@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>今日工资计算器</title>
+    <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"> -->
+    <link rel="stylesheet" href="all.min.css">
+    <link rel="icon" href="money.png">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #ffb347, #ffcc33);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 15px;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 800px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 25px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            border: 5px solid #fff;
+        }
+        
+        header {
+            background: linear-gradient(to right, #ff7e5f, #feb47b);
+            color: white;
+            padding: 20px 15px;
+            text-align: center;
+            position: relative;
+            border-bottom: 5px dashed #fff;
+        }
+        
+        header h1 {
+            font-size: clamp(1.5rem, 5vw, 2.5rem);
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+            padding: 0 60px;
+        }
+        
+        header p {
+            font-size: clamp(0.9rem, 3vw, 1.1rem);
+            opacity: 0.9;
+            font-weight: 500;
+            padding: 0 60px;
+        }
+        
+        .content {
+            display: flex;
+            flex-direction: column;
+            padding: clamp(15px, 3vw, 30px);
+            background-color: #f9f9f9;
+        }
+        
+        .section-title {
+            color: #ff7e5f;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px dotted #ffcc33;
+            font-size: clamp(1.3rem, 4vw, 1.8rem);
+            font-weight: 700;
+        }
+        
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            color: #555;
+            font-size: clamp(0.8rem, 2.5vw, 1rem);
+        }
+        
+        input, select {
+            width: 100%;
+            padding: clamp(8px, 2vw, 14px);
+            border: 2px solid #ffcc33;
+            border-radius: 15px;
+            font-size: clamp(0.9rem, 2.5vw, 1rem);
+            transition: all 0.3s;
+            background-color: #fff;
+        }
+        
+        input:focus, select:focus {
+            border-color: #ff7e5f;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(255, 126, 95, 0.2);
+        }
+        
+        button {
+            background: linear-gradient(to right, #ff7e5f, #feb47b);
+            color: white;
+            border: none;
+            padding: clamp(10px, 2vw, 15px) clamp(15px, 3vw, 25px);
+            font-size: clamp(0.9rem, 2.5vw, 1.1rem);
+            border-radius: 50px;
+            cursor: pointer;
+            width: 100%;
+            font-weight: 600;
+            transition: all 0.3s;
+            margin-top: 10px;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 4px 10px rgba(255, 126, 95, 0.3);
+        }
+        
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 7px 15px rgba(255, 126, 95, 0.4);
+        }
+        
+        .money-display {
+            text-align: center;
+            margin-bottom: 20px;
+            background-color: #fff;
+            padding: clamp(10px, 3vw, 20px);
+            border-radius: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+        
+        .today-earned {
+            font-size: clamp(2rem, 7vw, 3.5rem);
+            font-weight: 700;
+            color: #ff7e5f;
+            margin: 10px 0;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+        }
+        
+        .progress-container {
+            background: #f0f0f0;
+            border-radius: 50px;
+            height: 20px;
+            margin: 15px 0;
+            overflow: hidden;
+            box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(to right, #ffcc33, #ff7e5f);
+            width: 0%;
+            border-radius: 50px;
+            transition: width 0.5s ease;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: clamp(8px, 2vw, 15px);
+            margin: 15px 0;
+        }
+        
+        .stat-card {
+            background: #fff;
+            border-radius: 15px;
+            padding: clamp(8px, 2vw, 15px);
+            text-align: center;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+            border: 2px solid #ffcc33;
+        }
+        
+        .stat-value {
+            font-size: clamp(1.1rem, 3.5vw, 1.5rem);
+            font-weight: 700;
+            color: #ff7e5f;
+        }
+        
+        .stat-label {
+            font-size: clamp(0.7rem, 2vw, 0.9rem);
+            color: #777;
+            margin-top: 5px;
+        }
+        
+        .motivation {
+            background: #fff9e6;
+            border-left: 4px solid #ffcc33;
+            padding: clamp(10px, 2vw, 15px);
+            border-radius: 0 15px 15px 0;
+            margin-top: 15px;
+            font-style: italic;
+            font-size: clamp(0.8rem, 2.5vw, 1rem);
+        }
+        
+        .motivation i {
+            color: #ffcc33;
+            margin-right: 10px;
+        }
+        
+        .time-display {
+            font-size: clamp(0.9rem, 2.5vw, 1.1rem);
+            color: #777;
+            text-align: center;
+            margin-top: 15px;
+            background: #fff;
+            padding: clamp(6px, 2vw, 10px);
+            border-radius: 50px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+        
+        .page {
+            display: none;
+        }
+        
+        .page.active {
+            display: block;
+        }
+        
+        .page-nav {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            display: flex;
+            gap: 5px;
+        }
+        
+        .page-nav button {
+            background: rgba(255, 255, 255, 0.3);
+            color: white;
+            border: 2px solid white;
+            padding: clamp(5px, 1.5vw, 8px) clamp(8px, 2vw, 15px);
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            width: auto;
+            margin-top: 0;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            font-size: clamp(0.7rem, 2vw, 0.9rem);
+        }
+        
+        .page-nav button.active {
+            background: white;
+            color: #ff7e5f;
+        }
+        
+        .full-width {
+            grid-column: 1 / -1;
+        }
+        
+        i {
+            margin-right: 5px;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 10px;
+            background-color: #f9f9f9;
+            border-top: 1px solid #ddd;
+        }
+
+        footer a {
+            color: #ff7e5f;
+            text-decoration: none;
+        }
+        
+        /* 自定义弹窗样式 */
+        .custom-alert {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s, visibility 0.3s;
+        }
+        
+        .custom-alert.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .alert-content {
+            background: white;
+            padding: 25px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            max-width: 90%;
+            width: 400px;
+            text-align: center;
+            position: relative;
+            transform: translateY(-50px);
+            transition: transform 0.4s;
+            border: 3px solid #ffcc33;
+        }
+        
+        .custom-alert.show .alert-content {
+            transform: translateY(0);
+        }
+        
+        .alert-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: #fff9e6;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 15px;
+            border: 3px solid #ffcc33;
+        }
+        
+        .alert-icon i {
+            font-size: 30px;
+            color: #ff7e5f;
+            margin: 0;
+        }
+        
+        .alert-title {
+            font-size: 1.5rem;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .alert-message {
+            font-size: 1rem;
+            color: #666;
+            margin-bottom: 20px;
+        }
+        
+        .alert-button {
+            background: linear-gradient(to right, #ff7e5f, #feb47b);
+            color: white;
+            border: none;
+            padding: 10px 30px;
+            border-radius: 50px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+            box-shadow: 0 4px 10px rgba(255, 126, 95, 0.3);
+        }
+        
+        .alert-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 7px 15px rgba(255, 126, 95, 0.4);
+        }
+        
+        @media (max-width: 768px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+            
+            .form-group {
+                margin-bottom: 10px;
+            }
+            
+            .stats {
+                gap: 10px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            header {
+                padding: 35px 10px 15px;
+            }
+            
+            .page-nav {
+                top: 5px;
+                right: 5px;
+            }
+            
+            .page-nav button {
+                padding: 4px 8px;
+            }
+            
+            .content {
+                padding: 15px 10px;
+            }
+            
+            .stats {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="page-nav">
+                <button id="settingsBtn" class="active"><i class="fas fa-cog"></i> 设置</button>
+                <button id="statsBtn"><i class="fas fa-chart-line"></i> 统计</button>
+            </div>
+            <h1><i class="fas fa-coins"></i> 今日工资计算器</h1>
+            <p id="headerDesc">设定您的工作参数，开始计算您的收入！</p>
+        </header>
+        
+        <div class="content">
+            <!-- 设置页面 -->
+            <div id="settingsPage" class="page active">
+                <h2 class="section-title"><i class="fas fa-sliders-h"></i> 工作参数设置</h2>
+                <form id="workSettings">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="monthlySalary"><i class="fas fa-money-bill-wave"></i> 月薪 (元)</label>
+                            <input type="number" id="monthlySalary" placeholder="输入您的月薪" value="10000" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="workDays"><i class="fas fa-calendar-alt"></i> 每月工作天数</label>
+                            <input type="number" id="workDays" placeholder="输入每月工作天数" value="22" min="1" max="31" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="startTime"><i class="fas fa-clock"></i> 上班时间</label>
+                            <input type="time" id="startTime" value="09:00" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="endTime"><i class="fas fa-clock"></i> 下班时间</label>
+                            <input type="time" id="endTime" value="18:00" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="lunchBreak"><i class="fas fa-utensils"></i> 午休时间 (分钟)</label>
+                            <input type="number" id="lunchBreak" placeholder="输入午休时间" value="0" min="0" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="decimalPlaces"><i class="fas fa-percentage"></i> 小数位数显示</label>
+                            <select id="decimalPlaces">
+                                <option value="0">0 (整数)</option>
+                                <option value="1">1 位小数</option>
+                                <option value="2" selected>2 位小数</option>
+                                <option value="3">3 位小数</option>
+                                <option value="4">4 位小数</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group full-width">
+                            <button type="submit"><i class="fas fa-save"></i> 保存设置并计算</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            
+            <!-- 统计页面 -->
+            <div id="statsPage" class="page">
+                <h2 class="section-title"><i class="fas fa-chart-bar"></i> 今日收入统计</h2>
+                
+                <div class="money-display">
+                    <p>您今天已经赚了：</p>
+                    <div class="today-earned">¥ 0.00</div>
+                    <p>继续努力！</p>
+                </div>
+                
+                <div class="progress-container">
+                    <div class="progress-bar"></div>
+                </div>
+                
+                <div class="time-display">
+                    当前时间: <span id="currentTime">00:00:00</span>
+                </div>
+                
+                <div class="stats">
+                    <div class="stat-card">
+                        <div class="stat-value" id="hourlyRate">¥ 0.00</div>
+                        <div class="stat-label">每小时收入</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="minuteRate">¥ 0.00</div>
+                        <div class="stat-label">每分钟收入</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="workProgress">0%</div>
+                        <div class="stat-label">今日进度</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="timeWorked">0h 0m</div>
+                        <div class="stat-label">已工作时间</div>
+                    </div>
+                </div>
+                
+                <div class="motivation">
+                    <i class="fas fa-lightbulb"></i> 
+                    <span id="motivationText">每一分钟的努力都在增加您的收入！</span>
+                </div>
+            </div>
+        </div>
+        <footer>
+            <p>
+                <strong>版权声明</strong>：  
+                本网站所有内容版权归 <a href="https://rensr.site" rel="noopener">任尚仁</a> 所有
+              </p>
+        </footer>
+    </div>
+
+    <!-- 自定义弹窗 -->
+    <div class="custom-alert" id="customAlert">
+        <div class="alert-content">
+            <div class="alert-icon">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <h3 class="alert-title">成功</h3>
+            <p class="alert-message" id="alertMessage">操作已完成</p>
+            <button class="alert-button" id="alertButton">确定</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html> 
