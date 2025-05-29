@@ -225,7 +225,7 @@ function copyShareLink() {
             
             setTimeout(() => {
                 copyLinkBtn.innerHTML = originalText;
-                copyLinkBtn.style.background = 'linear-gradient(to right, #ff7e5f, #feb47b)';
+                copyLinkBtn.style.background = '';
             }, 2000);
             
             showAlert('链接已复制到剪贴板！');
