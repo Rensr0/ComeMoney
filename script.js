@@ -23,6 +23,12 @@ const statsPage = document.getElementById('statsPage');
 const settingsBtn = document.getElementById('settingsBtn');
 const statsBtn = document.getElementById('statsBtn');
 
+// 分享链接元素
+const generateLinkBtn = document.getElementById('generateLinkBtn');
+const shareContainer = document.getElementById('shareContainer');
+const shareLink = document.getElementById('shareLink');
+const copyLinkBtn = document.getElementById('copyLinkBtn');
+
 // 页面描述文案
 const pageDescriptions = {
     settings: "设定您的工作参数，开始计算您的收入！",
@@ -45,19 +51,25 @@ let secondRate = 0;
 
 // 初始化
 function init() {
-    // 从localStorage加载保存的设置
-    const savedConfig = localStorage.getItem('workConfig');
-    if (savedConfig) {
-        config = JSON.parse(savedConfig);
-        document.getElementById('monthlySalary').value = config.monthlySalary;
-        document.getElementById('workDays').value = config.workDays;
-        document.getElementById('startTime').value = config.startTime;
-        document.getElementById('endTime').value = config.endTime;
-        document.getElementById('lunchBreak').value = config.lunchBreak;
-        
-        // 设置小数位数
-        if (config.decimalPlaces !== undefined) {
-            document.getElementById('decimalPlaces').value = config.decimalPlaces;
+    // 检查URL参数，如果有参数则直接加载并跳转到统计页面
+    if (parseUrlParams()) {
+        // 如果成功解析了URL参数，直接跳转到统计页面
+        showStatsPage();
+    } else {
+        // 否则从localStorage加载保存的设置
+        const savedConfig = localStorage.getItem('workConfig');
+        if (savedConfig) {
+            config = JSON.parse(savedConfig);
+            document.getElementById('monthlySalary').value = config.monthlySalary;
+            document.getElementById('workDays').value = config.workDays;
+            document.getElementById('startTime').value = config.startTime;
+            document.getElementById('endTime').value = config.endTime;
+            document.getElementById('lunchBreak').value = config.lunchBreak;
+            
+            // 设置小数位数
+            if (config.decimalPlaces !== undefined) {
+                document.getElementById('decimalPlaces').value = config.decimalPlaces;
+            }
         }
     }
     
@@ -70,6 +82,13 @@ function init() {
     
     // 自定义弹窗事件监听
     alertButton.addEventListener('click', hideAlert);
+    
+    // 生成链接和复制链接事件监听
+    generateLinkBtn.addEventListener('click', generateShareLink);
+    copyLinkBtn.addEventListener('click', copyShareLink);
+    
+    // 点击链接文本区域也可以复制
+    shareLink.addEventListener('click', copyShareLink);
     
     // 初始化计算
     calculateRates();
@@ -84,6 +103,137 @@ function init() {
     
     // 设置初始页面描述
     updateHeaderDescription('settings');
+}
+
+// 解析URL参数
+function parseUrlParams() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const params = urlParams.get('config');
+    
+    if (!params) {
+        return false;
+    }
+    
+    try {
+        // 解码并解析参数
+        const decodedParams = decodeURIComponent(params);
+        const parsedConfig = JSON.parse(atob(decodedParams));
+        
+        // 验证参数是否完整
+        if (!parsedConfig.monthlySalary || !parsedConfig.workDays || 
+            !parsedConfig.startTime || !parsedConfig.endTime) {
+            return false;
+        }
+        
+        // 更新配置
+        config = {
+            monthlySalary: parseFloat(parsedConfig.monthlySalary),
+            workDays: parseInt(parsedConfig.workDays),
+            startTime: parsedConfig.startTime,
+            endTime: parsedConfig.endTime,
+            lunchBreak: parseInt(parsedConfig.lunchBreak || 0),
+            decimalPlaces: parseInt(parsedConfig.decimalPlaces || 2)
+        };
+        
+        // 更新表单值（如果用户想要修改）
+        document.getElementById('monthlySalary').value = config.monthlySalary;
+        document.getElementById('workDays').value = config.workDays;
+        document.getElementById('startTime').value = config.startTime;
+        document.getElementById('endTime').value = config.endTime;
+        document.getElementById('lunchBreak').value = config.lunchBreak;
+        document.getElementById('decimalPlaces').value = config.decimalPlaces;
+        
+        return true;
+    } catch (error) {
+        console.error('解析URL参数错误:', error);
+        return false;
+    }
+}
+
+// 生成分享链接
+function generateShareLink() {
+    // 获取当前配置
+    const currentConfig = {
+        monthlySalary: parseFloat(document.getElementById('monthlySalary').value),
+        workDays: parseInt(document.getElementById('workDays').value),
+        startTime: document.getElementById('startTime').value,
+        endTime: document.getElementById('endTime').value,
+        lunchBreak: parseInt(document.getElementById('lunchBreak').value),
+        decimalPlaces: parseInt(document.getElementById('decimalPlaces').value)
+    };
+    
+    // 验证配置是否有效
+    if (!currentConfig.monthlySalary || !currentConfig.workDays || 
+        !currentConfig.startTime || !currentConfig.endTime) {
+        showAlert('请填写完整的工作参数！', 'error');
+        return;
+    }
+    
+    // 将配置转换为Base64编码
+    const configString = JSON.stringify(currentConfig);
+    const encodedConfig = btoa(configString);
+    
+    // 生成链接
+    const url = new URL(window.location.href);
+    url.search = `?config=${encodeURIComponent(encodedConfig)}`;
+    
+    // 显示链接
+    shareLink.textContent = url.toString();
+    shareContainer.style.display = 'block';
+    
+    // 添加淡入动画效果
+    shareContainer.style.opacity = '0';
+    setTimeout(() => {
+        shareContainer.style.transition = 'opacity 0.5s ease';
+        shareContainer.style.opacity = '1';
+        // 平滑滚动到分享区域
+        shareContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 50);
+    
+    // 添加鼠标悬停效果
+    shareLink.style.cursor = 'pointer';
+    shareLink.setAttribute('title', '点击复制链接');
+    
+    // 提示用户链接已生成
+    showAlert('分享链接已生成，可以复制并分享给同事！');
+}
+
+// 复制分享链接
+function copyShareLink() {
+    const linkText = shareLink.textContent;
+    
+    if (!linkText) {
+        showAlert('请先生成链接！', 'error');
+        return;
+    }
+    
+    // 使用现代剪贴板API
+    navigator.clipboard.writeText(linkText)
+        .then(() => {
+            // 添加复制成功的视觉反馈
+            shareLink.style.backgroundColor = '#f0fff0';
+            shareLink.style.borderColor = '#2ecc71';
+            setTimeout(() => {
+                shareLink.style.backgroundColor = '';
+                shareLink.style.borderColor = '';
+            }, 1000);
+            
+            // 更改复制按钮文本，短暂显示已复制
+            const originalText = copyLinkBtn.innerHTML;
+            copyLinkBtn.innerHTML = '<i class="fas fa-check"></i> 已复制';
+            copyLinkBtn.style.background = 'linear-gradient(to right, #2ecc71, #27ae60)';
+            
+            setTimeout(() => {
+                copyLinkBtn.innerHTML = originalText;
+                copyLinkBtn.style.background = 'linear-gradient(to right, #ff7e5f, #feb47b)';
+            }, 2000);
+            
+            showAlert('链接已复制到剪贴板！');
+        })
+        .catch(err => {
+            console.error('复制失败:', err);
+            showAlert('复制失败，请手动复制链接。', 'error');
+        });
 }
 
 // 显示设置页面
@@ -403,4 +553,4 @@ function updateClock() {
 }
 
 // 初始化应用
-window.addEventListener('DOMContentLoaded', init); 
+window.addEventListener('DOMContentLoaded', init);

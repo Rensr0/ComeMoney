@@ -274,6 +274,139 @@
             text-decoration: none;
         }
         
+        /* 分享链接样式 */
+        .share-container {
+            margin-top: 20px;
+            background: #fff;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            border: 2px solid #ffcc33;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .share-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(to right, #ff7e5f, #feb47b);
+        }
+        
+        .share-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #444;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .share-title i {
+            color: #ff7e5f;
+            margin-right: 8px;
+            font-size: 1.3rem;
+        }
+        
+        .share-link-container {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            position: relative;
+        }
+        
+        .share-link {
+            flex: 1;
+            padding: 12px 15px;
+            border: 2px solid #eee;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            background-color: #f9f9f9;
+            color: #555;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
+            transition: all 0.2s ease;
+        }
+        
+        .share-link:hover {
+            border-color: #ffcc33;
+            background-color: #fffaf0;
+        }
+        
+        .copy-btn {
+            background: linear-gradient(to right, #ff7e5f, #feb47b);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            max-width: 150px;
+            margin-top: 0;
+        }
+        
+        .copy-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+        }
+        
+        .share-tip {
+            font-size: 0.9rem;
+            color: #777;
+            font-style: italic;
+            margin-top: 10px;
+            display: flex;
+            align-items: center;
+            background-color: #fff9e6;
+            padding: 10px;
+            border-radius: 8px;
+            border-left: 3px solid #ffcc33;
+        }
+        
+        .share-tip i {
+            color: #ffcc33;
+            font-size: 1.1rem;
+            margin-right: 8px;
+        }
+        
+        .button-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+        
+        .button-group button {
+            width: 100%;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .button-group button:first-child {
+            background: linear-gradient(to right, #ff7e5f, #feb47b);
+        }
+        
+        /* .generate-link-btn {
+            background: linear-gradient(to right, #3498db, #2980b9);
+            margin-top: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .generate-link-btn i {
+            margin-right: 8px;
+            font-size: 1.1rem;
+        } */
+        
         /* 自定义弹窗样式 */
         .custom-alert {
             position: fixed;
@@ -375,6 +508,10 @@
             .stats {
                 gap: 10px;
             }
+            
+            .button-group {
+                grid-template-columns: 1fr;
+            }
         }
         
         @media (max-width: 480px) {
@@ -397,6 +534,15 @@
             
             .stats {
                 grid-template-columns: 1fr;
+            }
+            
+            .button-group button {
+                padding: 12px 10px;
+                font-size: 0.9rem;
+            }
+            
+            .button-group button i {
+                margin-right: 5px;
             }
         }
     </style>
@@ -455,10 +601,27 @@
                         </div>
                         
                         <div class="form-group full-width">
-                            <button type="submit"><i class="fas fa-save"></i> 保存设置并计算</button>
+                            <div class="button-group">
+                                <button type="submit"><i class="fas fa-save"></i> 保存设置并计算</button>
+                                <button type="button" id="generateLinkBtn" class="generate-link-btn"><i class="fas fa-link"></i> 生成分享链接</button>
+                            </div>
                         </div>
                     </div>
                 </form>
+                
+                <!-- 分享链接区域 -->
+                <div class="share-container" id="shareContainer" style="display: none;">
+                    <div class="share-title">
+                        <i class="fas fa-share-alt"></i> 分享链接
+                    </div>
+                    <div class="share-link-container">
+                        <div class="share-link" id="shareLink" title="点击复制链接"></div>
+                        <button class="copy-btn" id="copyLinkBtn"><i class="fas fa-copy"></i> 复制</button>
+                    </div>
+                    <div class="share-tip">
+                        <i class="fas fa-info-circle"></i> 分享此链接给同事，他们可以直接查看相同配置的收入统计
+                    </div>
+                </div>
             </div>
             
             <!-- 统计页面 -->
