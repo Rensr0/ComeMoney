@@ -10,6 +10,15 @@ let config = {
     decimalPlaces: 2
 };
 
+// 检查是否是夜班模式（上班时间晚于下班时间）
+function isNightShift() {
+    const [startHour, startMinute] = config.startTime.split(':').map(Number);
+    const [endHour, endMinute] = config.endTime.split(':').map(Number);
+    
+    // 如果开始时间大于结束时间，则视为夜班
+    return (startHour > endHour) || (startHour === endHour && startMinute > endMinute);
+}
+
 // 初始化配置
 export function initConfig() {
     // 检查URL参数，如果有参数则直接加载
@@ -131,23 +140,32 @@ export function getConfig() {
     return config;
 }
 
-// 计算总工作分钟数（不包括午休）
+// 计算总工作分钟数（不包括休息）
 export function calculateTotalWorkMinutes() {
     const [startHour, startMinute] = config.startTime.split(':').map(Number);
     const [endHour, endMinute] = config.endTime.split(':').map(Number);
     
     // 计算工作分钟数
-    let totalMinutes = (endHour * 60 + endMinute) - (startHour * 60 + startMinute);
+    let totalMinutes;
     
-    // 如果午休时间为0，直接返回总工作时间
+    // 检查是否是夜班
+    if (isNightShift()) {
+        // 夜班情况：结束时间加24小时
+        totalMinutes = ((endHour + 24) * 60 + endMinute) - (startHour * 60 + startMinute);
+    } else {
+        // 日班情况：正常计算
+        totalMinutes = (endHour * 60 + endMinute) - (startHour * 60 + startMinute);
+    }
+    
+    // 如果休息时间为0，直接返回总工作时间
     if (config.lunchBreak <= 0) {
         return totalMinutes;
     }
     
-    // 午休时间不能超过总工作时间
+    // 休息时间不能超过总工作时间
     const lunchBreak = Math.min(totalMinutes, config.lunchBreak);
     
-    // 减去午休时间
+    // 减去休息时间
     totalMinutes -= lunchBreak;
     
     return totalMinutes;

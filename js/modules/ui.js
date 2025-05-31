@@ -7,6 +7,9 @@ const todayEarned = document.querySelector('.today-earned');
 const hourlyRate = document.getElementById('hourlyRate');
 const minuteRate = document.getElementById('minuteRate');
 const progressBar = document.querySelector('.progress-bar');
+const progressText = document.getElementById('progressText');
+const progressStatus = document.getElementById('progressStatus');
+const statusText = document.getElementById('statusText');
 const workProgress = document.getElementById('workProgress');
 const timeWorked = document.getElementById('timeWorked');
 const currentTimeElement = document.getElementById('currentTime');
@@ -272,11 +275,64 @@ export function updateEarningsDisplay(todayEarningsValue, progressValue) {
     // 更新显示
     todayEarned.textContent = `¥ ${todayEarningsValue.toFixed(decimalPlaces)}`;
     progressBar.style.width = `${progressValue}%`;
+    progressText.textContent = `${progressValue}%`;
     workProgress.textContent = `${progressValue}%`;
+    
+    // 检查工作状态并更新文案
+    updateWorkStatusText();
     
     // 更新激励语
     const dailySalary = config.monthlySalary / config.workDays;
     updateMotivation(todayEarningsValue, dailySalary);
+}
+
+// 更新工作状态文案
+export function updateWorkStatusText() {
+    const config = getConfig();
+    const now = new Date();
+    
+    // 获取上下班时间
+    const [startHour, startMinute] = config.startTime.split(':').map(Number);
+    const [endHour, endMinute] = config.endTime.split(':').map(Number);
+    
+    // 创建今天的上班和下班时间
+    const startTime = new Date();
+    startTime.setHours(startHour, startMinute, 0, 0);
+    
+    const endTime = new Date();
+    endTime.setHours(endHour, endMinute, 0, 0);
+    
+    // 检查是否是夜班模式
+    const isNightShift = (startHour > endHour) || (startHour === endHour && startMinute > endMinute);
+    
+    // 如果是夜班，且当前时间在零点后但早于下班时间，需要将下班时间推到第二天
+    if (isNightShift && now < endTime) {
+        // 将结束时间设置为第二天
+        endTime.setDate(endTime.getDate() + 1);
+    }
+    
+    // 如果是夜班，且当前时间晚于上班时间但晚于23:59，需要将当前时间视为第二天
+    let adjustedNow = new Date(now);
+    if (isNightShift && now < startTime && now < endTime) {
+        // 对于夜班，如果当前时间在第二天的凌晨但还没下班，调整时间比较
+        adjustedNow.setDate(adjustedNow.getDate() + 1);
+    }
+    
+    // 如果还没到上班时间
+    if (now < startTime) {
+        statusText.textContent = "享受生活的时间，工作还未开始";
+        progressStatus.style.display = 'block';
+    } 
+    // 如果已经过了下班时间
+    else if (adjustedNow >= endTime) {
+        statusText.textContent = "工作已结束，好好休息吧";
+        progressStatus.style.display = 'block';
+    }
+    // 如果在工作时间内
+    else {
+        statusText.textContent = "工作进行中，保持专注";
+        progressStatus.style.display = 'block';
+    }
 }
 
 // 更新月收入和年收入显示

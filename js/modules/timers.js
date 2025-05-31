@@ -1,6 +1,6 @@
 // 定时器管理模块
 import { calculateRates, calculateTodayEarnings, calculateWorkProgress, calculateMonthEarnings, calculateYearEarnings } from './calculator.js';
-import { updateEarningsDisplay, updateClock, updateRatesDisplay, updateWorkTimeDisplay, updateExtendedEarnings, updateHolidayInfo } from './ui.js';
+import { updateEarningsDisplay, updateClock, updateRatesDisplay, updateWorkTimeDisplay, updateExtendedEarnings, updateHolidayInfo, updateWorkStatusText } from './ui.js';
 import { getNextHoliday } from './holiday.js';
 import { getConfig } from './config.js';
 
@@ -113,18 +113,66 @@ function updateTimeToLeave() {
     const config = getConfig();
     const now = new Date();
     
-    // 获取下班时间
+    // 获取上下班时间
+    const [startHour, startMinute] = config.startTime.split(':').map(Number);
     const [endHour, endMinute] = config.endTime.split(':').map(Number);
     
-    // 创建今天的下班时间
+    // 创建今天的上班和下班时间
+    const startTime = new Date();
+    startTime.setHours(startHour, startMinute, 0, 0);
+    
     const endTime = new Date();
     endTime.setHours(endHour, endMinute, 0, 0);
+    
+    // 检查是否是夜班模式
+    const isNightShift = (startHour > endHour) || (startHour === endHour && startMinute > endMinute);
+    
+    // 如果是夜班，且当前时间在零点后但早于下班时间，需要将下班时间推到第二天
+    if (isNightShift && now < endTime) {
+        // 将结束时间设置为第二天
+        endTime.setDate(endTime.getDate() + 1);
+    }
+    
+    // 如果是夜班，且当前时间晚于上班时间但晚于23:59，需要将当前时间视为第二天
+    let adjustedNow = new Date(now);
+    if (isNightShift && now < startTime && now < endTime) {
+        // 对于夜班，如果当前时间在第二天的凌晨但还没下班，调整时间比较
+        adjustedNow.setDate(adjustedNow.getDate() + 1);
+    }
     
     // 获取下班时间卡片元素
     const timeToLeaveCard = timeToLeaveElement.closest('.stat-card');
     
+    // 如果还没到上班时间
+    if (now < startTime) {
+        // 修改标题文案
+        const timeToLeaveTitle = timeToLeaveCard.querySelector('.stat-label');
+        if (timeToLeaveTitle) {
+            timeToLeaveTitle.textContent = "距离上班还有";
+        }
+        
+        // 计算剩余时间（毫秒）
+        const remainingTime = startTime - now;
+        
+        // 转换为小时、分钟和秒
+        const hours = Math.floor(remainingTime / (1000 * 60 * 60));
+        const minutes = Math.floor((remainingTime % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((remainingTime % (1000 * 60)) / 1000);
+        
+        // 格式化显示
+        const formattedHours = String(hours).padStart(2, '0');
+        const formattedMinutes = String(minutes).padStart(2, '0');
+        const formattedSeconds = String(seconds).padStart(2, '0');
+        
+        timeToLeaveElement.textContent = `${formattedHours}:${formattedMinutes}:${formattedSeconds}`;
+        
+        // 更新工作状态文案
+        updateWorkStatusText();
+        return;
+    }
+    
     // 如果已经过了下班时间
-    if (now >= endTime) {
+    if (adjustedNow >= endTime) {
         // 如果还没有设置为已下班状态
         if (!isWorkOver) {
             // 设置已下班标志
@@ -150,12 +198,16 @@ function updateTimeToLeave() {
                 }
             }
             
+            // 更新工作状态文案
+            updateWorkStatusText();
+            
             // 停止相关定时器
             stopEarningsTimers();
         }
         
         return;
     } else {
+        // 上班时间已到，下班时间未到，显示距离下班还有多久
         // 未下班，重置标志
         isWorkOver = false;
         
@@ -175,9 +227,12 @@ function updateTimeToLeave() {
                 timeToLeaveIcon.style.color = '';
             }
         }
+        
+        // 更新工作状态文案
+        updateWorkStatusText();
     }
     
-    // 计算剩余时间（毫秒）
+    // 计算距离下班的剩余时间（毫秒）
     const remainingTime = endTime - now;
     
     // 转换为小时、分钟和秒

@@ -51,8 +51,13 @@
                     <p>继续努力！</p>
                 </div>
 
+                <div class="progress-status" id="progressStatus">
+                    <i class="fas fa-clock"></i> <span id="statusText">准备开始新的一天</span>
+                </div>
+
                 <div class="progress-container">
                     <div class="progress-bar"></div>
+                    <div class="progress-text" id="progressText">0%</div>
                 </div>
 
                 <div class="time-display">
@@ -177,8 +182,8 @@
                         </div>
 
                         <div class="form-group">
-                            <label for="lunchBreak"><i class="fas fa-utensils"></i> 午休时间 (分钟)</label>
-                            <input type="number" id="lunchBreak" placeholder="输入午休时间" value="0" min="0" required>
+                            <label for="lunchBreak"><i class="fas fa-utensils"></i> 休息时间 (分钟)</label>
+                            <input type="number" id="lunchBreak" placeholder="输入休息时间" value="0" min="0" required>
                         </div>
 
                         <div class="form-group">

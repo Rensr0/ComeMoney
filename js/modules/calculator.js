@@ -7,6 +7,34 @@ let secondRate = 0;
 // 保存最后一个工作日的收入（用于调整模式）
 let lastWorkdayEarnings = 0;
 
+// 检查是否是夜班模式（上班时间晚于下班时间）
+function isNightShift(startTime, endTime) {
+    const [startHour, startMinute] = startTime.split(':').map(Number);
+    const [endHour, endMinute] = endTime.split(':').map(Number);
+    
+    // 如果开始时间大于结束时间，则视为夜班
+    return (startHour > endHour) || (startHour === endHour && startMinute > endMinute);
+}
+
+// 计算工作开始和结束的时间戳（秒）
+function calculateWorkTimeInSeconds(config) {
+    const [startHour, startMinute] = config.startTime.split(':').map(Number);
+    const [endHour, endMinute] = config.endTime.split(':').map(Number);
+    
+    // 计算开始时间（秒）
+    const workStartSeconds = (startHour * 60 + startMinute) * 60;
+    
+    // 计算结束时间（秒）
+    let workEndSeconds = (endHour * 60 + endMinute) * 60;
+    
+    // 如果是夜班，结束时间需要加上24小时
+    if (isNightShift(config.startTime, config.endTime)) {
+        workEndSeconds += 24 * 60 * 60; // 加上24小时的秒数
+    }
+    
+    return { workStartSeconds, workEndSeconds };
+}
+
 // 计算每小时、每分钟和每秒的收入率
 export function calculateRates() {
     const config = getConfig();
@@ -18,23 +46,20 @@ export function calculateRates() {
     const currentMinute = now.getMinutes();
     const currentSecond = now.getSeconds();
     
-    // 获取工作开始和结束时间
-    const [startHour, startMinute] = config.startTime.split(':').map(Number);
-    const [endHour, endMinute] = config.endTime.split(':').map(Number);
+    // 当前时间（秒）
+    const currentSeconds = (currentHour * 60 + currentMinute) * 60 + currentSecond;
     
     // 计算工作时间（秒）
-    const workStartSeconds = (startHour * 60 + startMinute) * 60;
-    const workEndSeconds = (endHour * 60 + endMinute) * 60;
-    const currentSeconds = (currentHour * 60 + currentMinute) * 60 + currentSecond;
+    const { workStartSeconds, workEndSeconds } = calculateWorkTimeInSeconds(config);
     
     // 计算总工作时间（秒）
     const totalWorkSeconds = workEndSeconds - workStartSeconds;
     
-    // 午休时间（秒），不能超过总工作时间
-    const lunchBreakSeconds = Math.min(totalWorkSeconds, config.lunchBreak * 60);
+    // 休息时间（秒），不能超过总工作时间
+    const breakSeconds = Math.min(totalWorkSeconds, config.lunchBreak * 60);
     
     // 实际工作时间（秒）
-    const totalWorkSecondsNet = Math.max(1, totalWorkSeconds - lunchBreakSeconds);
+    const totalWorkSecondsNet = Math.max(1, totalWorkSeconds - breakSeconds);
     
     // 基础小时工资率
     const baseHourlyWage = dailySalary / (totalWorkSecondsNet / 3600);
@@ -44,32 +69,39 @@ export function calculateRates() {
     let adjustedHourlyWage = baseHourlyWage;
     let adjustedMinuteWage = baseMinuteWage;
     
+    // 处理当前时间，考虑夜班情况
+    let adjustedCurrentSeconds = currentSeconds;
+    if (isNightShift(config.startTime, config.endTime) && currentSeconds < workStartSeconds && currentSeconds < workEndSeconds - 24 * 60 * 60) {
+        // 如果是夜班，且当前时间在零点后、下班时间前，需要加上24小时
+        adjustedCurrentSeconds += 24 * 60 * 60;
+    }
+    
     // 如果在工作时间内
-    if (currentSeconds >= workStartSeconds && currentSeconds <= workEndSeconds) {
+    if (adjustedCurrentSeconds >= workStartSeconds && adjustedCurrentSeconds <= workEndSeconds) {
         // 计算剩余工作时间（秒）
-        let remainingWorkSeconds = workEndSeconds - currentSeconds;
+        let remainingWorkSeconds = workEndSeconds - adjustedCurrentSeconds;
         
         // 计算已经过去的工作时间（秒）
-        let elapsedWorkSeconds = currentSeconds - workStartSeconds;
+        let elapsedWorkSeconds = adjustedCurrentSeconds - workStartSeconds;
         
-        // 午休开始时间设为工作时间的中点
-        const lunchStartSeconds = workStartSeconds + Math.floor((totalWorkSeconds - lunchBreakSeconds) / 2);
+        // 休息开始时间设为工作时间的中点
+        const breakStartSeconds = workStartSeconds + Math.floor((totalWorkSeconds - breakSeconds) / 2);
         
-        // 调整已经过去的工作时间，考虑午休
-        if (currentSeconds > lunchStartSeconds) {
-            const lunchElapsed = Math.min(lunchBreakSeconds, currentSeconds - lunchStartSeconds);
-            elapsedWorkSeconds = Math.max(0, elapsedWorkSeconds - lunchElapsed);
+        // 调整已经过去的工作时间，考虑休息
+        if (adjustedCurrentSeconds > breakStartSeconds) {
+            const breakElapsed = Math.min(breakSeconds, adjustedCurrentSeconds - breakStartSeconds);
+            elapsedWorkSeconds = Math.max(0, elapsedWorkSeconds - breakElapsed);
         }
         
-        // 计算实际剩余工作时间（考虑午休）
+        // 计算实际剩余工作时间（考虑休息）
         let adjustedRemainingSeconds = remainingWorkSeconds;
-        if (currentSeconds < lunchStartSeconds) {
-            // 如果午休还没开始，从剩余时间中减去午休
-            adjustedRemainingSeconds = Math.max(0, remainingWorkSeconds - lunchBreakSeconds);
-        } else if (currentSeconds < lunchStartSeconds + lunchBreakSeconds) {
-            // 如果正在午休，调整剩余时间
-            const remainingLunch = lunchStartSeconds + lunchBreakSeconds - currentSeconds;
-            adjustedRemainingSeconds = Math.max(0, remainingWorkSeconds - remainingLunch);
+        if (adjustedCurrentSeconds < breakStartSeconds) {
+            // 如果休息还没开始，从剩余时间中减去休息
+            adjustedRemainingSeconds = Math.max(0, remainingWorkSeconds - breakSeconds);
+        } else if (adjustedCurrentSeconds < breakStartSeconds + breakSeconds) {
+            // 如果正在休息，调整剩余时间
+            const remainingBreak = breakStartSeconds + breakSeconds - adjustedCurrentSeconds;
+            adjustedRemainingSeconds = Math.max(0, remainingWorkSeconds - remainingBreak);
         }
         
         // 如果还有剩余工作时间，根据剩余工作时间调整费率
@@ -103,50 +135,50 @@ export function calculateTodayEarnings() {
     const currentMinute = now.getMinutes();
     const currentSecond = now.getSeconds();
     
-    // 获取工作开始时间
-    const [startHour, startMinute] = config.startTime.split(':').map(Number);
-    
-    // 获取工作结束时间
-    const [endHour, endMinute] = config.endTime.split(':').map(Number);
+    // 当前时间（秒）
+    const currentSeconds = (currentHour * 60 + currentMinute) * 60 + currentSecond;
     
     // 计算工作时间（秒）
-    const workStartSeconds = (startHour * 60 + startMinute) * 60;
-    const workEndSeconds = (endHour * 60 + endMinute) * 60;
+    const { workStartSeconds, workEndSeconds } = calculateWorkTimeInSeconds(config);
     
     // 计算总工作时间（秒）
     const totalWorkSeconds = workEndSeconds - workStartSeconds;
     
-    // 午休时间（秒），不能超过总工作时间
-    const lunchBreakSeconds = Math.min(totalWorkSeconds, config.lunchBreak * 60);
-    
-    // 当前时间（秒）
-    const currentSeconds = (currentHour * 60 + currentMinute) * 60 + currentSecond;
+    // 休息时间（秒），不能超过总工作时间
+    const breakSeconds = Math.min(totalWorkSeconds, config.lunchBreak * 60);
     
     // 判断今天是否是工作日（1~workDays号为工作日）
     const isWorkday = currentDay <= config.workDays;
     
-    // 计算已工作秒数（考虑午休）
+    // 处理当前时间，考虑夜班情况
+    let adjustedCurrentSeconds = currentSeconds;
+    if (isNightShift(config.startTime, config.endTime) && currentSeconds < workStartSeconds && currentSeconds < workEndSeconds - 24 * 60 * 60) {
+        // 如果是夜班，且当前时间在零点后、下班时间前，需要加上24小时
+        adjustedCurrentSeconds += 24 * 60 * 60;
+    }
+    
+    // 计算已工作秒数（考虑休息）
     let workedSeconds = 0;
     
     // 如果还没开始工作
-    if (currentSeconds < workStartSeconds) {
+    if (adjustedCurrentSeconds < workStartSeconds) {
         workedSeconds = 0;
     } 
     // 如果已经下班
-    else if (currentSeconds > workEndSeconds) {
-        workedSeconds = Math.max(0, workEndSeconds - workStartSeconds - lunchBreakSeconds);
+    else if (adjustedCurrentSeconds > workEndSeconds) {
+        workedSeconds = Math.max(0, totalWorkSeconds - breakSeconds);
     }
     // 如果在工作时间内
     else {
-        workedSeconds = currentSeconds - workStartSeconds;
+        workedSeconds = adjustedCurrentSeconds - workStartSeconds;
         
-        // 午休开始时间设为工作时间的中点
-        const lunchStartSeconds = workStartSeconds + Math.floor((totalWorkSeconds - lunchBreakSeconds) / 2);
+        // 休息开始时间设为工作时间的中点
+        const breakStartSeconds = workStartSeconds + Math.floor((totalWorkSeconds - breakSeconds) / 2);
         
-        // 减去午休时间（如果处于午休之后）
-        if (currentSeconds > lunchStartSeconds) {
-            const lunchElapsed = Math.min(lunchBreakSeconds, currentSeconds - lunchStartSeconds);
-            workedSeconds = Math.max(0, workedSeconds - lunchElapsed);
+        // 减去休息时间（如果处于休息之后）
+        if (adjustedCurrentSeconds > breakStartSeconds) {
+            const breakElapsed = Math.min(breakSeconds, adjustedCurrentSeconds - breakStartSeconds);
+            workedSeconds = Math.max(0, workedSeconds - breakElapsed);
         }
     }
     
@@ -184,54 +216,54 @@ export function calculateWorkProgress() {
     const currentMinute = now.getMinutes();
     const currentSecond = now.getSeconds();
     
-    // 获取工作开始时间
-    const [startHour, startMinute] = config.startTime.split(':').map(Number);
-    
-    // 获取工作结束时间
-    const [endHour, endMinute] = config.endTime.split(':').map(Number);
+    // 当前时间（秒）
+    const currentSeconds = (currentHour * 60 + currentMinute) * 60 + currentSecond;
     
     // 计算工作时间（秒）
-    const workStartSeconds = (startHour * 60 + startMinute) * 60;
-    const workEndSeconds = (endHour * 60 + endMinute) * 60;
+    const { workStartSeconds, workEndSeconds } = calculateWorkTimeInSeconds(config);
     
     // 计算总工作时间（秒）
     const totalWorkSeconds = workEndSeconds - workStartSeconds;
     
-    // 午休时间（秒），不能超过总工作时间
-    const lunchBreakSeconds = Math.min(totalWorkSeconds, config.lunchBreak * 60);
+    // 休息时间（秒），不能超过总工作时间
+    const breakSeconds = Math.min(totalWorkSeconds, config.lunchBreak * 60);
     
     // 实际工作时间（秒）
-    const totalWorkSecondsNet = Math.max(1, totalWorkSeconds - lunchBreakSeconds);
+    const totalWorkSecondsNet = Math.max(1, totalWorkSeconds - breakSeconds);
     
-    // 当前时间（秒）
-    const currentSeconds = (currentHour * 60 + currentMinute) * 60 + currentSecond;
+    // 处理当前时间，考虑夜班情况
+    let adjustedCurrentSeconds = currentSeconds;
+    if (isNightShift(config.startTime, config.endTime) && currentSeconds < workStartSeconds && currentSeconds < workEndSeconds - 24 * 60 * 60) {
+        // 如果是夜班，且当前时间在零点后、下班时间前，需要加上24小时
+        adjustedCurrentSeconds += 24 * 60 * 60;
+    }
     
     // 计算进度百分比
     let progress = 0;
     
     // 如果还没开始工作
-    if (currentSeconds < workStartSeconds) {
+    if (adjustedCurrentSeconds < workStartSeconds) {
         progress = 0;
     } 
     // 如果已经下班
-    else if (currentSeconds > workEndSeconds) {
+    else if (adjustedCurrentSeconds > workEndSeconds) {
         progress = 100;
     }
     // 如果在工作时间内
     else {
-        // 午休开始时间设为工作时间的中点
-        const lunchStartSeconds = workStartSeconds + Math.floor((totalWorkSeconds - lunchBreakSeconds) / 2);
+        // 休息开始时间设为工作时间的中点
+        const breakStartSeconds = workStartSeconds + Math.floor((totalWorkSeconds - breakSeconds) / 2);
         
-        if (currentSeconds < lunchStartSeconds) {
-            // 午休前
-            progress = ((currentSeconds - workStartSeconds) / totalWorkSecondsNet) * 100;
-        } else if (currentSeconds < lunchStartSeconds + lunchBreakSeconds) {
-            // 午休中
-            progress = ((lunchStartSeconds - workStartSeconds) / totalWorkSecondsNet) * 100;
+        if (adjustedCurrentSeconds < breakStartSeconds) {
+            // 休息前
+            progress = ((adjustedCurrentSeconds - workStartSeconds) / totalWorkSecondsNet) * 100;
+        } else if (adjustedCurrentSeconds < breakStartSeconds + breakSeconds) {
+            // 休息中
+            progress = ((breakStartSeconds - workStartSeconds) / totalWorkSecondsNet) * 100;
         } else {
-            // 午休后
-            const afterLunchSeconds = currentSeconds - (lunchStartSeconds + lunchBreakSeconds);
-            progress = ((lunchStartSeconds - workStartSeconds + afterLunchSeconds) / totalWorkSecondsNet) * 100;
+            // 休息后
+            const afterBreakSeconds = adjustedCurrentSeconds - (breakStartSeconds + breakSeconds);
+            progress = ((breakStartSeconds - workStartSeconds + afterBreakSeconds) / totalWorkSecondsNet) * 100;
         }
         
         progress = Math.min(100, Math.max(0, progress));
