@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,21 +9,153 @@
     <link rel="stylesheet" href="css/all.min.css">
     <link rel="icon" href="img/money.png">
     <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/mobile.css">
 </head>
+
 <body>
     <div class="container">
         <header>
-            <div class="page-nav">
-                <button id="settingsBtn" class="active"><i class="fas fa-cog"></i> 设置</button>
-                <button id="statsBtn"><i class="fas fa-chart-line"></i> 统计</button>
+            <div class="menu-button" id="menuButton">
+                <i class="fas fa-bars"></i>
             </div>
             <h1><i class="fas fa-coins"></i> 今日工资计算器</h1>
-            <p id="headerDesc">设定您的工作参数，开始计算您的收入！</p>
+            <p id="headerDesc">来，来，来财！</p>
         </header>
+
+        <!-- 侧边菜单 -->
+        <div class="side-menu" id="sideMenu">
+            <div class="menu-header">
+                <div class="menu-close" id="menuClose">
+                    <i class="fas fa-times"></i>
+                </div>
+                <h3>菜单</h3>
+            </div>
+            <div class="menu-items">
+                <button id="statsBtn" class="active"><i class="fas fa-chart-line"></i> 统计</button>
+                <button id="settingsBtn"><i class="fas fa-cog"></i> 设置</button>
+                <button id="aboutBtn"><i class="fas fa-info-circle"></i> 关于</button>
+            </div>
+        </div>
+
+        <!-- 遮罩层 -->
+        <div class="overlay" id="overlay"></div>
         
         <div class="content">
+            <!-- 统计页面 -->
+            <div id="statsPage" class="page active">
+                <h2 class="section-title"><i class="fas fa-chart-bar"></i> 今日收入统计</h2>
+
+                <div class="money-display">
+                    <p>您今天已经赚了：</p>
+                    <div class="today-earned">¥ 0.00</div>
+                    <p>继续努力！</p>
+                </div>
+
+                <div class="progress-container">
+                    <div class="progress-bar"></div>
+                </div>
+
+                <div class="time-display">
+                    当前时间: <span id="currentTime">00:00:00</span>
+                </div>
+
+                <!-- 倒计时容器 -->
+                <div class="countdown-container">
+                    <!-- 假期倒计时 -->
+                    <div class="holiday-countdown">
+                        <div class="holiday-icon">
+                            <i class="fas fa-calendar-alt"></i>
+                        </div>
+                        <div class="holiday-info">
+                            <div class="holiday-title">距离 <span id="holidayName">下个假期</span> 还有</div>
+                            <div class="holiday-days" id="holidayDays">--</div>
+                            <div class="holiday-date" id="holidayDate">--</div>
+                        </div>
+                    </div>
+                    
+                    <!-- 下班时间倒计时 -->
+                    <div class="holiday-countdown">
+                        <div class="holiday-icon">
+                            <i class="fas fa-hourglass-half"></i>
+                        </div>
+                        <div class="holiday-info">
+                            <div class="holiday-title">距离下班还有</div>
+                            <div class="holiday-days" id="timeToLeave">--:--:--</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 添加月收入和年收入显示 -->
+                <div class="extended-stats">
+                    <div class="extended-stat-card">
+                        <div class="extended-stat-icon">
+                            <i class="fas fa-calendar"></i>
+                        </div>
+                        <div class="extended-stat-info">
+                            <div class="extended-stat-label">今年已赚</div>
+                            <div class="extended-stat-value" id="yearEarned">¥ 0.00</div>
+                        </div>
+                    </div>
+                    <div class="extended-stat-card">
+                        <div class="extended-stat-icon">
+                            <i class="fas fa-calendar-alt"></i>
+                        </div>
+                        <div class="extended-stat-info">
+                            <div class="extended-stat-label">本月已赚</div>
+                            <div class="extended-stat-value" id="monthEarned">¥ 0.00</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stats">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-dollar-sign"></i>
+                        </div>
+                        <div class="stat-info">
+                            <div class="stat-value" id="hourlyRate">¥ 0.00</div>
+                            <div class="stat-label">每小时收入</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-coins"></i>
+                        </div>
+                        <div class="stat-info">
+                            <div class="stat-value" id="minuteRate">¥ 0.00</div>
+                            <div class="stat-label">每分钟收入</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <div class="stat-info">
+                            <div class="stat-value" id="workProgress">0%</div>
+                            <div class="stat-label">今日进度</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="stat-info">
+                            <div class="stat-value" id="timeWorked">0h 0m</div>
+                            <div class="stat-label">已工作时间</div>
+                        </div>
+                    </div>
+                </div>
+                
+                
+                
+                <div class="motivation">
+                    <i class="fas fa-lightbulb"></i> 
+                    <span id="motivationText">每一分钟的努力都在增加您的收入！</span>
+                </div>
+            </div>
+
             <!-- 设置页面 -->
-            <div id="settingsPage" class="page active">
+            <div id="settingsPage" class="page">
                 <h2 class="section-title"><i class="fas fa-sliders-h"></i> 工作参数设置</h2>
                 <form id="workSettings">
                     <div class="form-grid">
@@ -33,7 +166,8 @@
                         
                         <div class="form-group">
                             <label for="workDays"><i class="fas fa-calendar-alt"></i> 每月工作天数</label>
-                            <input type="number" id="workDays" placeholder="输入每月工作天数" value="22" min="1" max="31" required>
+                            <input type="number" id="workDays" placeholder="输入每月工作天数" value="22" min="1" max="31"
+                                required>
                         </div>
                         
                         <div class="form-group">
@@ -65,7 +199,8 @@
                         <div class="form-group full-width">
                             <div class="button-group">
                                 <button type="submit"><i class="fas fa-save"></i> 保存设置并计算</button>
-                                <button type="button" id="generateLinkBtn" class="generate-link-btn"><i class="fas fa-link"></i> 生成分享链接</button>
+                                <button type="button" id="generateLinkBtn" class="generate-link-btn"><i
+                                        class="fas fa-link"></i> 生成分享链接</button>
                             </div>
                         </div>
                     </div>
@@ -86,46 +221,83 @@
                 </div>
             </div>
             
-            <!-- 统计页面 -->
-            <div id="statsPage" class="page">
-                <h2 class="section-title"><i class="fas fa-chart-bar"></i> 今日收入统计</h2>
+            <!-- 关于页面 -->
+            <div id="aboutPage" class="page">
+                <h2 class="section-title"><i class="fas fa-info-circle"></i> 关于本应用</h2>
                 
-                <div class="money-display">
-                    <p>您今天已经赚了：</p>
-                    <div class="today-earned">¥ 0.00</div>
-                    <p>继续努力！</p>
+                <div class="about-container">
+                    <div class="version-card">
+                        <div class="version-header">
+                            <h3>0.0.3</h3>
+                            <span class="version-date">2025年5月31日</span>
                 </div>
+                        <div class="version-title">移动端焕新：口袋里的效率神器</div>
+                        <div class="version-content">
+                            <h4>手机端体验大升级：</h4>
+                            <p>重新设计界面布局：手机页面显示更加友好；首页新增快捷卡片，关键信息一目了然。</p>
                 
-                <div class="progress-container">
-                    <div class="progress-bar"></div>
+                            <h4>新增三大实用功能：</h4>
+                            <ol>
+                                <li>
+                                    <strong>下班倒计时：</strong>
+                                    <p>设置上下班时间后，首页实时显示"距离下班还有XX小时XX分钟"，摸鱼有盼头，工作更高效！</p>
+                                </li>
+                                <li>
+                                    <strong>假期小闹钟：</strong>
+                                    <p>自动识别下一个法定假期（如端午、国庆），显示剩余天数，再也不怕错过假期规划。</p>
+                                </li>
+                                <li>
+                                    <strong>收入小账本：</strong>
+                                    <p>输入月薪后，实时计算"当月已赚"和"今年累计收入"，搭配进度条显示，搞钱动力拉满！</p>
+                                </li>
+                            </ol>
+                            
+                            <h4>承诺：</h4>
+                            <p>采用本地存储方案，数据仅用于本地计算，全程不上传服务器，严格保障隐私安全。</p>
+                            
+                            <h4>未来计划：</h4>
+                            <p>下一个版本或将加入"番茄钟"和"支出记录"功能，敬请期待！</p>
                 </div>
-                
-                <div class="time-display">
-                    当前时间: <span id="currentTime">00:00:00</span>
-                </div>
-                
-                <div class="stats">
-                    <div class="stat-card">
-                        <div class="stat-value" id="hourlyRate">¥ 0.00</div>
-                        <div class="stat-label">每小时收入</div>
                     </div>
-                    <div class="stat-card">
-                        <div class="stat-value" id="minuteRate">¥ 0.00</div>
-                        <div class="stat-label">每分钟收入</div>
+                    
+                    <div class="version-card">
+                        <div class="version-header">
+                            <h3>0.0.2</h3>
+                            <span class="version-date">2025年5月30日</span>
+                        </div>
+                        <div class="version-title">细节升级：让体验更贴心</div>
+                        <div class="version-content">
+                            <h4>暗黑模式来了！</h4>
+                            <p>无论是深夜加班还是白天通勤，应用会自动跟随系统主题切换明暗模式，适配你的视觉习惯。</p>
+                            <p>深色模式采用低饱和度配色方案，优化界面元素对比度，降低视觉疲劳。</p>
+                            
+                            <h4>分享你的专属配置：</h4>
+                            <p>新增 "分享链接" 功能，可一键生成包含自定义工作参数（如上下班时间、月薪配置）的专属链接。</p>
+                            <p>场景举例：和同事约定相同的下班倒计时目标，通过链接快速同步配置，卷王/摸鱼党的必备！</p>
+                        </div>
                     </div>
-                    <div class="stat-card">
-                        <div class="stat-value" id="workProgress">0%</div>
-                        <div class="stat-label">今日进度</div>
+                    
+                    <div class="version-card">
+                        <div class="version-header">
+                            <h3>0.0.1</h3>
+                            <span class="version-date">2025年5月29日</span>
+                        </div>
+                        <div class="version-title">从想法到落地：项目正式启航</div>
+                        <div class="version-content">
+                            <h4>我做了什么：</h4>
+                            <p>经过前期构思与需求梳理，明确开发聚焦时间管理与数据可视化的工具类应用，旨在帮助用户直观掌控工作与生活节奏。</p>
+                            <p>完成首版原型设计，规划核心功能架构：从基础界面框架搭建，到后续规划的时间、假期、收入等数据展示模块。</p>
+                            
+                            <h4>你将看到什么：</h4>
+                            <p>即将上线简洁主界面，支持基础页面导航与数据入口功能。</p>
+                            <p>实现版本可用性验证，用户可体验基础操作流程。</p>
+                        </div>
                     </div>
-                    <div class="stat-card">
-                        <div class="stat-value" id="timeWorked">0h 0m</div>
-                        <div class="stat-label">已工作时间</div>
+                    
+                    <div class="contact-section">
+                        <h3>联系我们</h3>
+                        <p>若有任何想法和建议均可发送邮箱至：<a href="mailto:admin@rensr.site">admin@rensr.site</a></p>
                     </div>
-                </div>
-                
-                <div class="motivation">
-                    <i class="fas fa-lightbulb"></i> 
-                    <span id="motivationText">每一分钟的努力都在增加您的收入！</span>
                 </div>
             </div>
         </div>
@@ -149,6 +321,7 @@
         </div>
     </div>
 
-    <script src="js/script.js"></script>
+    <script type="module" src="js/main.js"></script>
 </body>
+
 </html> 

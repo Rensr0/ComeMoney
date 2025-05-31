@@ -1,0 +1,344 @@
+/* 移动端响应式样式 */
+@media (max-width: 768px) {
+    .form-group {
+        margin-bottom: 10px;
+    }
+    
+    .stats {
+        gap: 10px;
+    }
+    
+    /* 按钮组保持两列 */
+    .button-group {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+    }
+    
+    .side-menu {
+        width: 250px;
+    }
+    
+    /* 扩展统计样式调整 */
+    .extended-stats {
+        gap: 10px;
+    }
+    
+    /* 倒计时容器样式调整 */
+    .countdown-container {
+        gap: 10px;
+    }
+    
+    /* 图标尺寸调整 */
+    .stat-icon, .extended-stat-icon, .holiday-icon {
+        width: 35px;
+        height: 35px;
+    }
+    
+    .stat-icon i, .extended-stat-icon i, .holiday-icon i {
+        font-size: 1rem;
+    }
+    
+    /* 卡片内间距调整 */
+    .stat-card, .extended-stat-card, .holiday-countdown {
+        padding: 10px;
+        gap: 8px;
+    }
+    
+    /* 关于页面移动端样式 */
+    .version-card {
+        padding: 15px;
+    }
+    
+    .version-header h3 {
+        font-size: 1.2rem;
+    }
+    
+    .version-date {
+        font-size: 0.8rem;
+    }
+    
+    .version-title {
+        font-size: 1.1rem;
+        margin-bottom: 12px;
+        padding-bottom: 8px;
+    }
+    
+    .version-content h4 {
+        font-size: 1rem;
+    }
+    
+    .version-content p {
+        font-size: 0.9rem;
+    }
+    
+    .contact-section {
+        padding: 12px 15px;
+    }
+    
+    .contact-section h3 {
+        font-size: 1.1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    header {
+        padding: 35px 10px 15px;
+    }
+    
+    .menu-button {
+        top: 10px;
+        left: 10px;
+        width: 35px;
+        height: 35px;
+    }
+    
+    .menu-button i {
+        font-size: 1rem;
+    }
+    
+    .content {
+        padding: 15px 10px;
+    }
+    
+    /* 保持两列布局 */
+    .stats {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+    }
+    
+    /* 设置页面表单保持两列布局 */
+    .form-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+    }
+    
+    /* 表单元素样式调整 */
+    .form-group {
+        margin-bottom: 8px;
+    }
+    
+    .form-group label {
+        font-size: 0.85rem;
+        margin-bottom: 4px;
+    }
+    
+    .form-group input, .form-group select {
+        padding: 8px;
+        font-size: 0.9rem;
+    }
+    
+    /* 按钮组保持两列 */
+    .form-group.full-width {
+        grid-column: 1 / -1;
+    }
+    
+    .button-group {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+    }
+    
+    .button-group button {
+        padding: 10px 8px;
+        font-size: 0.85rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    
+    .button-group button i {
+        margin-right: 4px;
+    }
+    
+    .menu-items button {
+        padding: 12px;
+        font-size: 0.95rem;
+    }
+    
+    /* 扩展统计样式调整 - 保持两列 */
+    .extended-stats {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+    }
+    
+    /* 倒计时容器样式调整 - 保持两列 */
+    .countdown-container {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+    }
+    
+    /* 假期倒计时样式调整 */
+    .holiday-countdown {
+        padding: 8px;
+    }
+    
+    /* 图标尺寸进一步调整 */
+    .stat-icon, .extended-stat-icon, .holiday-icon {
+        width: 28px;
+        height: 28px;
+        min-width: 28px; /* 防止图标被压缩 */
+    }
+    
+    .stat-icon i, .extended-stat-icon i, .holiday-icon i {
+        font-size: 0.85rem;
+    }
+    
+    /* 字体大小调整 */
+    .stat-value, .extended-stat-value, .holiday-days {
+        font-size: clamp(0.9rem, 2.8vw, 1.1rem);
+    }
+    
+    .stat-label, .extended-stat-label, .holiday-title {
+        font-size: clamp(0.65rem, 1.6vw, 0.75rem);
+    }
+    
+    /* 调整卡片间距 */
+    .stat-card, .extended-stat-card, .holiday-countdown {
+        padding: 8px;
+        gap: 6px;
+    }
+    
+    /* 调整信息区域 */
+    .stat-info, .extended-stat-info, .holiday-info {
+        font-size: 0.9rem;
+    }
+    
+    /* 关于页面小屏幕样式 */
+    .version-card {
+        padding: 12px;
+    }
+    
+    .version-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 5px;
+    }
+    
+    .version-header h3 {
+        font-size: 1.1rem;
+    }
+    
+    .version-date {
+        font-size: 0.75rem;
+    }
+    
+    .version-title {
+        font-size: 1rem;
+        margin-bottom: 10px;
+        padding-bottom: 6px;
+    }
+    
+    .version-content h4 {
+        font-size: 0.95rem;
+    }
+    
+    .version-content p {
+        font-size: 0.85rem;
+        line-height: 1.4;
+    }
+    
+    .version-content li {
+        margin-bottom: 8px;
+    }
+    
+    .contact-section {
+        padding: 10px;
+    }
+    
+    .contact-section h3 {
+        font-size: 1rem;
+        margin-bottom: 8px;
+    }
+    
+    .contact-section p {
+        font-size: 0.85rem;
+    }
+}
+
+/* 超小屏幕适配 */
+@media (max-width: 360px) {
+    /* 保持布局但调整尺寸 */
+    .stat-icon, .extended-stat-icon, .holiday-icon {
+        width: 24px;
+        height: 24px;
+        min-width: 24px;
+    }
+    
+    .stat-icon i, .extended-stat-icon i, .holiday-icon i {
+        font-size: 0.8rem;
+    }
+    
+    .stat-value, .extended-stat-value, .holiday-days {
+        font-size: clamp(0.8rem, 2.5vw, 1rem);
+    }
+    
+    .stat-label, .extended-stat-label, .holiday-title {
+        font-size: clamp(0.6rem, 1.5vw, 0.7rem);
+    }
+    
+    /* 进一步减小间距 */
+    .stats, .extended-stats, .countdown-container, .form-grid {
+        gap: 6px;
+    }
+    
+    .stat-card, .extended-stat-card, .holiday-countdown {
+        padding: 6px;
+        gap: 4px;
+    }
+    
+    /* 表单元素进一步调整 */
+    .form-group label {
+        font-size: 0.8rem;
+    }
+    
+    .form-group input, .form-group select {
+        padding: 6px;
+        font-size: 0.85rem;
+    }
+    
+    /* 按钮组在超小屏幕上的调整 */
+    .button-group {
+        gap: 6px;
+    }
+    
+    .button-group button {
+        padding: 8px 6px;
+        font-size: 0.8rem;
+    }
+    
+    .button-group button i {
+        margin-right: 3px;
+        font-size: 0.8rem;
+    }
+    
+    /* 关于页面超小屏幕样式 */
+    .about-container {
+        gap: 12px;
+    }
+    
+    .version-card {
+        padding: 10px;
+    }
+    
+    .version-header h3 {
+        font-size: 1rem;
+    }
+    
+    .version-title {
+        font-size: 0.9rem;
+        margin-bottom: 8px;
+        padding-bottom: 5px;
+    }
+    
+    .version-content {
+        gap: 8px;
+    }
+    
+    .version-content h4 {
+        font-size: 0.9rem;
+    }
+    
+    .version-content p {
+        font-size: 0.8rem;
+        line-height: 1.3;
+    }
+} 
