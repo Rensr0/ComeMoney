@@ -62,7 +62,16 @@ function loadFromLocalStorage() {
 
 // 更新表单值
 function updateFormValues() {
-    document.getElementById('monthlySalary').value = config.monthlySalary;
+    // 检查是否在设置页面
+    const monthlySalaryInput = document.getElementById('monthlySalary');
+    
+    // 如果在统计页面或关于页面，不存在这些元素，则直接返回
+    if (!monthlySalaryInput) {
+        return;
+    }
+    
+    // 更新表单值
+    monthlySalaryInput.value = config.monthlySalary;
     document.getElementById('workDays').value = config.workDays;
     document.getElementById('startTime').value = config.startTime;
     document.getElementById('endTime').value = config.endTime;
@@ -70,7 +79,10 @@ function updateFormValues() {
     
     // 设置小数位数
     if (config.decimalPlaces !== undefined) {
-        document.getElementById('decimalPlaces').value = config.decimalPlaces;
+        const decimalPlacesSelect = document.getElementById('decimalPlaces');
+        if (decimalPlacesSelect) {
+            decimalPlacesSelect.value = config.decimalPlaces;
+        }
     }
 }
 
@@ -104,6 +116,9 @@ function parseUrlParams() {
             decimalPlaces: parseInt(parsedConfig.decimalPlaces || 2)
         };
         
+        // 保存到localStorage，确保在页面间导航时配置保持一致
+        localStorage.setItem('workConfig', JSON.stringify(config));
+        
         return { success: true, fromUrl: true };
     } catch (error) {
         console.error('解析URL参数错误:', error);
@@ -115,24 +130,38 @@ function parseUrlParams() {
 export function saveSettings(e) {
     if (e) e.preventDefault();
     
-    // 更新配置
-    config.monthlySalary = parseFloat(document.getElementById('monthlySalary').value) || 10000;
-    config.workDays = parseInt(document.getElementById('workDays').value) || 22;
-    config.startTime = document.getElementById('startTime').value;
-    config.endTime = document.getElementById('endTime').value;
-    config.lunchBreak = parseInt(document.getElementById('lunchBreak').value) || 0;
-    config.decimalPlaces = parseInt(document.getElementById('decimalPlaces').value) || 2;
+    // 检查是否在设置页面
+    const monthlySalaryInput = document.getElementById('monthlySalary');
     
-    // 验证工作时间和午休时间
-    const totalWorkMinutes = calculateTotalWorkMinutes();
-    if (totalWorkMinutes <= 0) {
+    // 如果不在设置页面，直接返回false
+    if (!monthlySalaryInput) {
+        console.error('不在设置页面，无法保存设置');
         return false;
     }
     
-    // 保存到localStorage
-    localStorage.setItem('workConfig', JSON.stringify(config));
-    
-    return true;
+    try {
+        // 更新配置
+        config.monthlySalary = parseFloat(monthlySalaryInput.value) || 10000;
+        config.workDays = parseInt(document.getElementById('workDays').value) || 22;
+        config.startTime = document.getElementById('startTime').value;
+        config.endTime = document.getElementById('endTime').value;
+        config.lunchBreak = parseInt(document.getElementById('lunchBreak').value) || 0;
+        config.decimalPlaces = parseInt(document.getElementById('decimalPlaces').value) || 2;
+        
+        // 验证工作时间和午休时间
+        const totalWorkMinutes = calculateTotalWorkMinutes();
+        if (totalWorkMinutes <= 0) {
+            return false;
+        }
+        
+        // 保存到localStorage
+        localStorage.setItem('workConfig', JSON.stringify(config));
+        
+        return true;
+    } catch (error) {
+        console.error('保存设置时出错:', error);
+        return false;
+    }
 }
 
 // 获取当前配置
@@ -181,15 +210,26 @@ export function calculateWorkHours() {
 
 // 生成当前配置的分享链接
 export function generateConfigShareLink() {
-    // 获取当前配置
-    const currentConfig = {
-        monthlySalary: parseFloat(document.getElementById('monthlySalary').value),
-        workDays: parseInt(document.getElementById('workDays').value),
-        startTime: document.getElementById('startTime').value,
-        endTime: document.getElementById('endTime').value,
-        lunchBreak: parseInt(document.getElementById('lunchBreak').value),
-        decimalPlaces: parseInt(document.getElementById('decimalPlaces').value)
-    };
+    // 检查是否在设置页面
+    const monthlySalaryInput = document.getElementById('monthlySalary');
+    
+    // 如果不在设置页面，使用当前配置生成链接
+    let currentConfig;
+    
+    if (!monthlySalaryInput) {
+        // 使用当前内存中的配置
+        currentConfig = { ...config };
+    } else {
+        // 使用表单中的值
+        currentConfig = {
+            monthlySalary: parseFloat(monthlySalaryInput.value),
+            workDays: parseInt(document.getElementById('workDays').value),
+            startTime: document.getElementById('startTime').value,
+            endTime: document.getElementById('endTime').value,
+            lunchBreak: parseInt(document.getElementById('lunchBreak').value),
+            decimalPlaces: parseInt(document.getElementById('decimalPlaces').value)
+        };
+    }
     
     // 验证配置是否有效
     if (!currentConfig.monthlySalary || !currentConfig.workDays || 

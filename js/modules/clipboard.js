@@ -1,10 +1,10 @@
 // 剪贴板管理模块
-import { showAlert } from './ui.js';
+import { showClipboardEmptyMessage, showClipboardCopyFailMessage, showClipboardFallbackFailMessage } from './ui.js';
 
 // 复制文本到剪贴板
 export function copyToClipboard(text) {
     if (!text) {
-        showAlert('请先生成链接！', 'error');
+        showClipboardEmptyMessage();
         return false;
     }
     
@@ -58,12 +58,12 @@ function fallbackCopy(text) {
         if (successful) {
             return true;
         } else {
-            showAlert('复制失败，请手动复制链接。', 'error');
+            showClipboardCopyFailMessage();
             return false;
         }
     } catch (err) {
         console.error('备用复制方法失败:', err);
-        showAlert('复制失败，请长按链接并手动复制。', 'error');
+        showClipboardFallbackFailMessage();
         return false;
     }
 } 

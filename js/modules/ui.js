@@ -56,6 +56,62 @@ const pageDescriptions = {
     about: "了解应用的更新历史和未来计划"
 };
 
+// 管理用户访问状态
+export function isFirstVisit() {
+    return !localStorage.getItem('hasVisitedBefore');
+}
+
+export function markAsVisited() {
+    localStorage.setItem('hasVisitedBefore', 'true');
+}
+
+export function shouldShowWelcomeMessage() {
+    return !localStorage.getItem('hasShownWelcomeMessage');
+}
+
+export function markWelcomeMessageShown() {
+    localStorage.setItem('hasShownWelcomeMessage', 'true');
+}
+
+// 常用提示消息
+export function showFirstVisitMessage() {
+    showAlert('检测到您是首次使用，请先完成工作参数设置后再启动使用。', 'info');
+    markWelcomeMessageShown();
+}
+
+export function showConfigImportSuccessMessage() {
+    showAlert('配置导入成功！', 'success');
+}
+
+export function showConfigImportFailMessage() {
+    showAlert('抱歉，参数导入失败，请手动配置一下吧', 'error');
+}
+
+export function showConfigSaveSuccessMessage() {
+    showAlert('设置已保存！');
+}
+
+export function showConfigSaveFailMessage() {
+    showAlert('保存失败，请检查您的输入！', 'error');
+}
+
+// 剪贴板相关提示消息
+export function showClipboardEmptyMessage() {
+    showAlert('请先生成链接！', 'error');
+}
+
+export function showClipboardCopyFailMessage() {
+    showAlert('复制失败，请手动复制链接。', 'error');
+}
+
+export function showClipboardFallbackFailMessage() {
+    showAlert('复制失败，请长按链接并手动复制。', 'error');
+}
+
+export function showClipboardCopySuccessMessage() {
+    showAlert('链接已复制到剪贴板！');
+}
+
 // 初始化UI
 export function initUI(configStatus) {
     // 如果是从URL导入配置成功
@@ -63,9 +119,9 @@ export function initUI(configStatus) {
         // 显示统计页面
         showStatsPage();
         // 显示导入成功提示
-        showAlert('配置导入成功！', 'success');
+        showConfigImportSuccessMessage();
         // 设置访问标记
-        localStorage.setItem('hasVisitedBefore', 'true');
+        markAsVisited();
         return;
     }
     
@@ -74,20 +130,20 @@ export function initUI(configStatus) {
         // 显示设置页面
         showSettingsPage();
         // 显示导入失败提示
-        showAlert('抱歉，参数导入失败，请手动配置一下吧', 'error');
+        showConfigImportFailMessage();
         // 设置访问标记
-        localStorage.setItem('hasVisitedBefore', 'true');
+        markAsVisited();
         return;
     }
     
     // 检查是否是首次访问
-    const isFirstVisit = !localStorage.getItem('hasVisitedBefore');
+    const isFirstTimeVisit = isFirstVisit();
     
-    if (isFirstVisit) {
+    if (isFirstTimeVisit) {
         // 首次访问，显示设置页面
         showSettingsPage();
         // 设置访问标记
-        localStorage.setItem('hasVisitedBefore', 'true');
+        markAsVisited();
     } else {
         // 非首次访问，显示统计页面
         updateHeaderDescription('stats');
@@ -186,12 +242,21 @@ function updateHeaderDescription(page) {
 
 // 显示自定义弹窗
 export function showAlert(message, type = 'success') {
+    if (!customAlert || !alertMessage || !alertTitle || !alertIcon) {
+        console.error("弹窗元素未找到");
+        return;
+    }
+    
     alertMessage.textContent = message;
     
     // 根据类型设置标题和图标
     if (type === 'error') {
         alertTitle.textContent = '错误';
         alertIcon.className = 'fas fa-exclamation-circle';
+        alertIcon.style.color = '#e74c3c';
+    } else if (type === 'info') {
+        alertTitle.textContent = '提示';
+        alertIcon.className = 'fas fa-info-circle';
         alertIcon.style.color = '#e74c3c';
     } else {
         alertTitle.textContent = '成功';
@@ -201,28 +266,18 @@ export function showAlert(message, type = 'success') {
     
     // 显示弹窗
     customAlert.classList.add('show');
-    
-    // 添加键盘事件监听
-    document.addEventListener('keydown', handleEscKey);
 }
 
 // 隐藏自定义弹窗
 export function hideAlert() {
+    if (!customAlert) return;
+    
     customAlert.classList.remove('show');
-    document.removeEventListener('keydown', handleEscKey);
-}
-
-// 处理ESC键关闭弹窗
-function handleEscKey(e) {
-    if (e.key === 'Escape') {
-        hideAlert();
-        closeMenu();
-    }
 }
 
 // 显示分享链接
 export function displayShareLink(linkText) {
-    if (!linkText) return;
+    if (!shareContainer || !shareLink || !linkText) return;
     
     // 显示链接
     shareLink.textContent = linkText;
@@ -244,6 +299,8 @@ export function displayShareLink(linkText) {
 
 // 显示复制成功的反馈
 export function showCopySuccess() {
+    if (!shareLink || !copyLinkBtn) return;
+    
     // 添加复制成功的视觉反馈
     shareLink.style.backgroundColor = '#f0fff0';
     shareLink.style.borderColor = '#2ecc71';
@@ -253,7 +310,6 @@ export function showCopySuccess() {
     }, 1000);
     
     // 更改复制按钮文本，短暂显示已复制
-    const copyLinkBtn = document.getElementById('copyLinkBtn');
     const originalText = copyLinkBtn.innerHTML;
     copyLinkBtn.innerHTML = '<i class="fas fa-check"></i> 已复制';
     copyLinkBtn.style.background = 'linear-gradient(to right, #2ecc71, #27ae60)';
@@ -263,7 +319,7 @@ export function showCopySuccess() {
         copyLinkBtn.style.background = '';
     }, 2000);
     
-    showAlert('链接已复制到剪贴板！');
+    showClipboardCopySuccessMessage();
 }
 
 // 更新收入显示
@@ -272,11 +328,28 @@ export function updateEarningsDisplay(todayEarningsValue, progressValue) {
     // 获取小数位数设置
     const decimalPlaces = config.decimalPlaces || 2;
     
-    // 更新显示
-    todayEarned.textContent = `¥ ${todayEarningsValue.toFixed(decimalPlaces)}`;
-    progressBar.style.width = `${progressValue}%`;
-    progressText.textContent = `${progressValue}%`;
-    workProgress.textContent = `${progressValue}%`;
+    // 查找DOM元素
+    const todayEarned = document.querySelector('.today-earned');
+    const progressBar = document.querySelector('.progress-bar');
+    const progressText = document.getElementById('progressText');
+    const workProgress = document.getElementById('workProgress');
+    
+    // 只在找到对应元素时更新显示
+    if (todayEarned) {
+        todayEarned.textContent = `¥ ${todayEarningsValue.toFixed(decimalPlaces)}`;
+    }
+    
+    if (progressBar) {
+        progressBar.style.width = `${progressValue}%`;
+    }
+    
+    if (progressText) {
+        progressText.textContent = `${progressValue}%`;
+    }
+    
+    if (workProgress) {
+        workProgress.textContent = `${progressValue}%`;
+    }
     
     // 检查工作状态并更新文案
     updateWorkStatusText();
@@ -288,6 +361,10 @@ export function updateEarningsDisplay(todayEarningsValue, progressValue) {
 
 // 更新工作状态文案
 export function updateWorkStatusText() {
+    const statusText = document.getElementById('statusText');
+    const progressStatus = document.getElementById('progressStatus');
+    if (!statusText || !progressStatus) return;
+    
     const config = getConfig();
     const now = new Date();
     
@@ -295,48 +372,62 @@ export function updateWorkStatusText() {
     const [startHour, startMinute] = config.startTime.split(':').map(Number);
     const [endHour, endMinute] = config.endTime.split(':').map(Number);
     
-    // 创建今天的上班和下班时间
-    const startTime = new Date();
-    startTime.setHours(startHour, startMinute, 0, 0);
-    
-    const endTime = new Date();
-    endTime.setHours(endHour, endMinute, 0, 0);
-    
     // 检查是否是夜班模式
     const isNightShift = (startHour > endHour) || (startHour === endHour && startMinute > endMinute);
     
-    // 如果是夜班，且当前时间在零点后但早于下班时间，需要将下班时间推到第二天
-    if (isNightShift && now < endTime) {
-        // 将结束时间设置为第二天
-        endTime.setDate(endTime.getDate() + 1);
+    if (isNightShift) {
+        // 对于夜班模式，我们直接计算时间（以分钟为单位）进行比较
+        const currentMinutes = now.getHours() * 60 + now.getMinutes();
+        const startMinutes = startHour * 60 + startMinute;
+        const endMinutes = endHour * 60 + endMinute;
+        
+        // 如果结束时间小于开始时间，说明跨越了午夜
+        if (endMinutes < startMinutes) {
+            // 第一种情况: 当前时间在上班时间之后、午夜之前
+            if (currentMinutes >= startMinutes) {
+                statusText.textContent = "工作进行中，保持专注";
+            } 
+            // 第二种情况: 当前时间在午夜之后、下班时间之前
+            else if (currentMinutes <= endMinutes) {
+                statusText.textContent = "工作进行中，保持专注";
+            }
+            // 第三种情况: 当前时间在下班时间之后、上班时间之前
+            else {
+                statusText.textContent = "工作已结束，好好休息吧";
+            }
+        }
+    } else {
+        // 创建今天的上班和下班时间对象用于比较
+        const startTime = new Date();
+        startTime.setHours(startHour, startMinute, 0, 0);
+        
+        const endTime = new Date();
+        endTime.setHours(endHour, endMinute, 0, 0);
+        
+        // 如果还没到上班时间
+        if (now < startTime) {
+            statusText.textContent = "享受生活的时间，工作还未开始";
+        } 
+        // 如果已经过了下班时间
+        else if (now >= endTime) {
+            statusText.textContent = "工作已结束，好好休息吧";
+        }
+        // 如果在工作时间内
+        else {
+            statusText.textContent = "工作进行中，保持专注";
+        }
     }
     
-    // 如果是夜班，且当前时间晚于上班时间但晚于23:59，需要将当前时间视为第二天
-    let adjustedNow = new Date(now);
-    if (isNightShift && now < startTime && now < endTime) {
-        // 对于夜班，如果当前时间在第二天的凌晨但还没下班，调整时间比较
-        adjustedNow.setDate(adjustedNow.getDate() + 1);
-    }
-    
-    // 如果还没到上班时间
-    if (now < startTime) {
-        statusText.textContent = "享受生活的时间，工作还未开始";
-        progressStatus.style.display = 'block';
-    } 
-    // 如果已经过了下班时间
-    else if (adjustedNow >= endTime) {
-        statusText.textContent = "工作已结束，好好休息吧";
-        progressStatus.style.display = 'block';
-    }
-    // 如果在工作时间内
-    else {
-        statusText.textContent = "工作进行中，保持专注";
-        progressStatus.style.display = 'block';
-    }
+    progressStatus.style.display = 'block';
 }
 
 // 更新月收入和年收入显示
 export function updateExtendedEarnings(monthEarnings, yearEarnings) {
+    const monthEarnedElement = document.getElementById('monthEarned');
+    const yearEarnedElement = document.getElementById('yearEarned');
+    
+    if (!monthEarnedElement || !yearEarnedElement) return;
+    
     const config = getConfig();
     const decimalPlaces = config.decimalPlaces || 2;
     
@@ -347,12 +438,17 @@ export function updateExtendedEarnings(monthEarnings, yearEarnings) {
 
 // 更新假期信息
 export function updateHolidayInfo(holidayInfo) {
-    if (!holidayInfo) return;
+    const holidayNameElement = document.getElementById('holidayName');
+    const holidayDaysElement = document.getElementById('holidayDays');
+    const holidayDateElement = document.getElementById('holidayDate');
+    
+    if (!holidayInfo || !holidayNameElement || !holidayDaysElement || !holidayDateElement) return;
     
     const { name, date, daysLeft } = holidayInfo;
     
     // 获取假期卡片元素
     const holidayCountdown = holidayDaysElement.closest('.stat-card');
+    if (!holidayCountdown) return;
     
     // 更新假期名称
     holidayNameElement.textContent = name || '下个假期';
@@ -364,20 +460,18 @@ export function updateHolidayInfo(holidayInfo) {
         holidayDaysElement.style.color = '#ff7e5f'; // 使用高亮颜色
         
         // 添加特殊样式类
-        if (holidayCountdown) {
-            holidayCountdown.classList.add('holiday-today');
-            
-            // 修改标题文案
-            const holidayTitle = holidayCountdown.querySelector('.stat-label');
-            if (holidayTitle) {
-                holidayTitle.innerHTML = `今天就是<span id="holidayName">${name}，</span>`;
-            }
-            
-            // 修改图标颜色
-            const holidayIcon = holidayCountdown.querySelector('.stat-icon i');
-            if (holidayIcon) {
-                holidayIcon.style.color = '#ff7e5f';
-            }
+        holidayCountdown.classList.add('holiday-today');
+        
+        // 修改标题文案
+        const holidayTitle = holidayCountdown.querySelector('.stat-label');
+        if (holidayTitle) {
+            holidayTitle.innerHTML = `今天就是<span id="holidayName">${name}，</span>`;
+        }
+        
+        // 修改图标颜色
+        const holidayIcon = holidayCountdown.querySelector('.stat-icon i');
+        if (holidayIcon) {
+            holidayIcon.style.color = '#ff7e5f';
         }
     } else {
         // 不是今天
@@ -385,20 +479,18 @@ export function updateHolidayInfo(holidayInfo) {
         holidayDaysElement.style.color = ''; // 恢复默认颜色
         
         // 移除特殊样式类
-        if (holidayCountdown) {
-            holidayCountdown.classList.remove('holiday-today');
-            
-            // 恢复默认标题文案
-            const holidayTitle = holidayCountdown.querySelector('.stat-label');
-            if (holidayTitle) {
-                holidayTitle.innerHTML = `距离 <span id="holidayName">${name}</span> 还有：`;
-            }
-            
-            // 恢复图标默认颜色
-            const holidayIcon = holidayCountdown.querySelector('.stat-icon i');
-            if (holidayIcon) {
-                holidayIcon.style.color = '';
-            }
+        holidayCountdown.classList.remove('holiday-today');
+        
+        // 恢复默认标题文案
+        const holidayTitle = holidayCountdown.querySelector('.stat-label');
+        if (holidayTitle) {
+            holidayTitle.innerHTML = `距离 <span id="holidayName">${name}</span> 还有：`;
+        }
+        
+        // 恢复图标默认颜色
+        const holidayIcon = holidayCountdown.querySelector('.stat-icon i');
+        if (holidayIcon) {
+            holidayIcon.style.color = '';
         }
     }
     
@@ -408,6 +500,11 @@ export function updateHolidayInfo(holidayInfo) {
 
 // 更新费率显示
 export function updateRatesDisplay(hourlyWage, minuteWage) {
+    const hourlyRate = document.getElementById('hourlyRate');
+    const minuteRate = document.getElementById('minuteRate');
+    
+    if (!hourlyRate || !minuteRate) return;
+    
     const config = getConfig();
     // 获取小数位数设置
     const decimalPlaces = config.decimalPlaces || 2;
@@ -419,11 +516,17 @@ export function updateRatesDisplay(hourlyWage, minuteWage) {
 
 // 更新工作时间显示
 export function updateWorkTimeDisplay(hours, minutes) {
+    const timeWorked = document.getElementById('timeWorked');
+    if (!timeWorked) return;
+    
     timeWorked.textContent = `${hours}h ${minutes}m`;
 }
 
 // 更新时钟
 export function updateClock() {
+    const currentTimeElement = document.getElementById('currentTime');
+    if (!currentTimeElement) return;
+    
     const now = new Date();
     const hours = String(now.getHours()).padStart(2, '0');
     const minutes = String(now.getMinutes()).padStart(2, '0');
@@ -433,6 +536,9 @@ export function updateClock() {
 
 // 更新激励语
 function updateMotivation(todayEarnings, dailySalary) {
+    const motivationText = document.getElementById('motivationText');
+    if (!motivationText) return;
+    
     const percentage = (todayEarnings / dailySalary * 100).toFixed(1);
     
     if (percentage < 20) {

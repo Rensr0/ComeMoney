@@ -14,11 +14,9 @@ export async function fetchHolidayInfo() {
     
     // 如果缓存有效，直接返回缓存数据
     if (holidayCache && (now - lastFetchTime < CACHE_DURATION)) {
-        console.log('使用假期信息缓存数据');
         return holidayCache;
     }
     
-    console.log('开始请求假期API...');
     try {
         const response = await fetch(HOLIDAY_API_URL);
         
@@ -27,7 +25,6 @@ export async function fetchHolidayInfo() {
         }
         
         const data = await response.json();
-        console.log('假期API请求成功:', data);
         
         // 更新缓存
         holidayCache = data;
@@ -39,7 +36,6 @@ export async function fetchHolidayInfo() {
         
         // 如果有缓存，返回过期的缓存数据
         if (holidayCache) {
-            console.log('使用过期的缓存数据');
             return holidayCache;
         }
         

@@ -117,42 +117,231 @@ function updateTimeToLeave() {
     const [startHour, startMinute] = config.startTime.split(':').map(Number);
     const [endHour, endMinute] = config.endTime.split(':').map(Number);
     
-    // 创建今天的上班和下班时间
-    const startTime = new Date();
-    startTime.setHours(startHour, startMinute, 0, 0);
-    
-    const endTime = new Date();
-    endTime.setHours(endHour, endMinute, 0, 0);
-    
     // 检查是否是夜班模式
     const isNightShift = (startHour > endHour) || (startHour === endHour && startMinute > endMinute);
-    
-    // 如果是夜班，且当前时间在零点后但早于下班时间，需要将下班时间推到第二天
-    if (isNightShift && now < endTime) {
-        // 将结束时间设置为第二天
-        endTime.setDate(endTime.getDate() + 1);
-    }
-    
-    // 如果是夜班，且当前时间晚于上班时间但晚于23:59，需要将当前时间视为第二天
-    let adjustedNow = new Date(now);
-    if (isNightShift && now < startTime && now < endTime) {
-        // 对于夜班，如果当前时间在第二天的凌晨但还没下班，调整时间比较
-        adjustedNow.setDate(adjustedNow.getDate() + 1);
-    }
     
     // 获取下班时间卡片元素
     const timeToLeaveCard = timeToLeaveElement.closest('.stat-card');
     
-    // 如果还没到上班时间
-    if (now < startTime) {
-        // 修改标题文案
-        const timeToLeaveTitle = timeToLeaveCard.querySelector('.stat-label');
-        if (timeToLeaveTitle) {
-            timeToLeaveTitle.textContent = "距离上班还有";
+    if (isNightShift) {
+        // 对于夜班模式，直接计算时间（以分钟为单位）进行比较
+        const currentMinutes = now.getHours() * 60 + now.getMinutes();
+        const startMinutes = startHour * 60 + startMinute;
+        const endMinutes = endHour * 60 + endMinute;
+        
+        // 第一种情况: 当前时间在上班时间之前
+        if (currentMinutes < startMinutes && (currentMinutes > endMinutes || endMinutes > startMinutes)) {
+            // 距离上班还有多久
+            const remainingMinutes = startMinutes - currentMinutes;
+            const hours = Math.floor(remainingMinutes / 60);
+            const minutes = remainingMinutes % 60;
+            const seconds = now.getSeconds();
+            
+            // 修改标题文案
+            const timeToLeaveTitle = timeToLeaveCard.querySelector('.stat-label');
+            if (timeToLeaveTitle) {
+                timeToLeaveTitle.textContent = "距离上班还有";
+            }
+            
+            // 格式化显示
+            const formattedHours = String(hours).padStart(2, '0');
+            const formattedMinutes = String(minutes).padStart(2, '0');
+            const formattedSeconds = String(60 - seconds).padStart(2, '0');
+            
+            timeToLeaveElement.textContent = `${formattedHours}:${formattedMinutes}:${formattedSeconds}`;
+            
+            // 移除特殊样式
+            if (timeToLeaveCard) {
+                timeToLeaveCard.classList.remove('holiday-today');
+                
+                // 恢复图标默认颜色
+                const timeToLeaveIcon = timeToLeaveCard.querySelector('.stat-icon i');
+                if (timeToLeaveIcon) {
+                    timeToLeaveIcon.style.color = '';
+                }
+            }
+            
+            isWorkOver = false;
+            return;
         }
         
-        // 计算剩余时间（毫秒）
-        const remainingTime = startTime - now;
+        // 第二种情况: 当前时间在上班时间之后、下班时间之前（跨午夜）
+        if ((currentMinutes >= startMinutes) || (currentMinutes <= endMinutes)) {
+            // 未下班，重置标志
+            isWorkOver = false;
+            
+            // 移除特殊样式类
+            if (timeToLeaveCard) {
+                timeToLeaveCard.classList.remove('holiday-today');
+                
+                // 恢复默认标题文案
+                const timeToLeaveTitle = timeToLeaveCard.querySelector('.stat-label');
+                if (timeToLeaveTitle) {
+                    timeToLeaveTitle.textContent = "距离下班还有";
+                }
+                
+                // 恢复图标默认颜色
+                const timeToLeaveIcon = timeToLeaveCard.querySelector('.stat-icon i');
+                if (timeToLeaveIcon) {
+                    timeToLeaveIcon.style.color = '';
+                }
+            }
+            
+            // 计算距离下班的剩余时间（分钟）
+            let remainingMinutes;
+            if (currentMinutes >= startMinutes) {
+                // 当前时间在上班之后、午夜之前
+                remainingMinutes = (24 * 60) - currentMinutes + endMinutes;
+            } else {
+                // 当前时间在午夜之后、下班之前
+                remainingMinutes = endMinutes - currentMinutes;
+            }
+            
+            const hours = Math.floor(remainingMinutes / 60);
+            const minutes = remainingMinutes % 60;
+            const seconds = 60 - now.getSeconds();
+            
+            // 格式化显示
+            const formattedHours = String(hours).padStart(2, '0');
+            const formattedMinutes = String(minutes).padStart(2, '0');
+            const formattedSeconds = String(seconds).padStart(2, '0');
+            
+            timeToLeaveElement.textContent = `${formattedHours}:${formattedMinutes}:${formattedSeconds}`;
+            return;
+        }
+        
+        // 第三种情况: 当前时间在下班时间之后、上班时间之前
+        if (currentMinutes > endMinutes && currentMinutes < startMinutes) {
+            // 如果还没有设置为已下班状态
+            if (!isWorkOver) {
+                // 设置已下班标志
+                isWorkOver = true;
+                
+                // 更新显示文本
+                timeToLeaveElement.textContent = "已下班";
+                
+                // 添加特殊样式类，类似假期样式
+                if (timeToLeaveCard) {
+                    timeToLeaveCard.classList.add('holiday-today');
+                    
+                    // 修改标题文案
+                    const timeToLeaveTitle = timeToLeaveCard.querySelector('.stat-label');
+                    if (timeToLeaveTitle) {
+                        timeToLeaveTitle.textContent = "今天工作已完成！";
+                    }
+                    
+                    // 修改图标颜色
+                    const timeToLeaveIcon = timeToLeaveCard.querySelector('.stat-icon i');
+                    if (timeToLeaveIcon) {
+                        timeToLeaveIcon.style.color = '#ff7e5f';
+                    }
+                }
+                
+                // 停止相关定时器
+                stopEarningsTimers();
+            }
+            return;
+        }
+    } else {
+        // 正常班次逻辑
+        // 创建今天的上班和下班时间
+        const startTime = new Date();
+        startTime.setHours(startHour, startMinute, 0, 0);
+        
+        const endTime = new Date();
+        endTime.setHours(endHour, endMinute, 0, 0);
+        
+        // 如果还没到上班时间
+        if (now < startTime) {
+            // 修改标题文案
+            const timeToLeaveTitle = timeToLeaveCard.querySelector('.stat-label');
+            if (timeToLeaveTitle) {
+                timeToLeaveTitle.textContent = "距离上班还有";
+            }
+            
+            // 计算剩余时间（毫秒）
+            const remainingTime = startTime - now;
+            
+            // 转换为小时、分钟和秒
+            const hours = Math.floor(remainingTime / (1000 * 60 * 60));
+            const minutes = Math.floor((remainingTime % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((remainingTime % (1000 * 60)) / 1000);
+            
+            // 格式化显示
+            const formattedHours = String(hours).padStart(2, '0');
+            const formattedMinutes = String(minutes).padStart(2, '0');
+            const formattedSeconds = String(seconds).padStart(2, '0');
+            
+            timeToLeaveElement.textContent = `${formattedHours}:${formattedMinutes}:${formattedSeconds}`;
+            
+            // 更新工作状态文案
+            updateWorkStatusText();
+            return;
+        }
+        
+        // 如果已经过了下班时间
+        if (now >= endTime) {
+            // 如果还没有设置为已下班状态
+            if (!isWorkOver) {
+                // 设置已下班标志
+                isWorkOver = true;
+                
+                // 更新显示文本
+                timeToLeaveElement.textContent = "已下班";
+                
+                // 添加特殊样式类，类似假期样式
+                if (timeToLeaveCard) {
+                    timeToLeaveCard.classList.add('holiday-today');
+                    
+                    // 修改标题文案
+                    const timeToLeaveTitle = timeToLeaveCard.querySelector('.stat-label');
+                    if (timeToLeaveTitle) {
+                        timeToLeaveTitle.textContent = "今天工作已完成！";
+                    }
+                    
+                    // 修改图标颜色
+                    const timeToLeaveIcon = timeToLeaveCard.querySelector('.stat-icon i');
+                    if (timeToLeaveIcon) {
+                        timeToLeaveIcon.style.color = '#ff7e5f';
+                    }
+                }
+                
+                // 更新工作状态文案
+                updateWorkStatusText();
+                
+                // 停止相关定时器
+                stopEarningsTimers();
+            }
+            
+            return;
+        } else {
+            // 上班时间已到，下班时间未到，显示距离下班还有多久
+            // 未下班，重置标志
+            isWorkOver = false;
+            
+            // 移除特殊样式类
+            if (timeToLeaveCard) {
+                timeToLeaveCard.classList.remove('holiday-today');
+                
+                // 恢复默认标题文案
+                const timeToLeaveTitle = timeToLeaveCard.querySelector('.stat-label');
+                if (timeToLeaveTitle) {
+                    timeToLeaveTitle.textContent = "距离下班还有";
+                }
+                
+                // 恢复图标默认颜色
+                const timeToLeaveIcon = timeToLeaveCard.querySelector('.stat-icon i');
+                if (timeToLeaveIcon) {
+                    timeToLeaveIcon.style.color = '';
+                }
+            }
+            
+            // 更新工作状态文案
+            updateWorkStatusText();
+        }
+        
+        // 计算距离下班的剩余时间（毫秒）
+        const remainingTime = endTime - now;
         
         // 转换为小时、分钟和秒
         const hours = Math.floor(remainingTime / (1000 * 60 * 60));
@@ -165,85 +354,5 @@ function updateTimeToLeave() {
         const formattedSeconds = String(seconds).padStart(2, '0');
         
         timeToLeaveElement.textContent = `${formattedHours}:${formattedMinutes}:${formattedSeconds}`;
-        
-        // 更新工作状态文案
-        updateWorkStatusText();
-        return;
     }
-    
-    // 如果已经过了下班时间
-    if (adjustedNow >= endTime) {
-        // 如果还没有设置为已下班状态
-        if (!isWorkOver) {
-            // 设置已下班标志
-            isWorkOver = true;
-            
-            // 更新显示文本
-            timeToLeaveElement.textContent = "已下班";
-            
-            // 添加特殊样式类，类似假期样式
-            if (timeToLeaveCard) {
-                timeToLeaveCard.classList.add('holiday-today');
-                
-                // 修改标题文案
-                const timeToLeaveTitle = timeToLeaveCard.querySelector('.stat-label');
-                if (timeToLeaveTitle) {
-                    timeToLeaveTitle.textContent = "今天工作已完成！";
-                }
-                
-                // 修改图标颜色
-                const timeToLeaveIcon = timeToLeaveCard.querySelector('.stat-icon i');
-                if (timeToLeaveIcon) {
-                    timeToLeaveIcon.style.color = '#ff7e5f';
-                }
-            }
-            
-            // 更新工作状态文案
-            updateWorkStatusText();
-            
-            // 停止相关定时器
-            stopEarningsTimers();
-        }
-        
-        return;
-    } else {
-        // 上班时间已到，下班时间未到，显示距离下班还有多久
-        // 未下班，重置标志
-        isWorkOver = false;
-        
-        // 移除特殊样式类
-        if (timeToLeaveCard) {
-            timeToLeaveCard.classList.remove('holiday-today');
-            
-            // 恢复默认标题文案
-            const timeToLeaveTitle = timeToLeaveCard.querySelector('.stat-label');
-            if (timeToLeaveTitle) {
-                timeToLeaveTitle.textContent = "距离下班还有";
-            }
-            
-            // 恢复图标默认颜色
-            const timeToLeaveIcon = timeToLeaveCard.querySelector('.stat-icon i');
-            if (timeToLeaveIcon) {
-                timeToLeaveIcon.style.color = '';
-            }
-        }
-        
-        // 更新工作状态文案
-        updateWorkStatusText();
-    }
-    
-    // 计算距离下班的剩余时间（毫秒）
-    const remainingTime = endTime - now;
-    
-    // 转换为小时、分钟和秒
-    const hours = Math.floor(remainingTime / (1000 * 60 * 60));
-    const minutes = Math.floor((remainingTime % (1000 * 60 * 60)) / (1000 * 60));
-    const seconds = Math.floor((remainingTime % (1000 * 60)) / 1000);
-    
-    // 格式化显示
-    const formattedHours = String(hours).padStart(2, '0');
-    const formattedMinutes = String(minutes).padStart(2, '0');
-    const formattedSeconds = String(seconds).padStart(2, '0');
-    
-    timeToLeaveElement.textContent = `${formattedHours}:${formattedMinutes}:${formattedSeconds}`;
 }

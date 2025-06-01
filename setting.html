@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>今日工资计算器</title>
+    <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"> -->
+    <link rel="stylesheet" href="css/all.min.css">
+    <link rel="icon" href="img/money.png">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/mobile.css">
+    
+    <!-- 预加载其他页面 -->
+    <link rel="prefetch" href="index.html">
+    <link rel="prefetch" href="about.html">
+    
+    <!-- 预加载关键JavaScript -->
+    <link rel="prefetch" href="js/index-main.js">
+    <link rel="prefetch" href="js/about-main.js">
+    
+    <!-- 注册Service Worker -->
+    <script src="js/register-sw.js"></script>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <div class="menu-button" id="menuButton">
+                <i class="fas fa-bars"></i>
+            </div>
+            <h1><i class="fas fa-coins"></i> 今日工资计算器</h1>
+            <p id="headerDesc">设定您的工作参数，开始计算您的收入！</p>
+        </header>
+
+        <!-- 侧边菜单 -->
+        <div class="side-menu" id="sideMenu">
+            <div class="menu-header">
+                <div class="menu-close" id="menuClose">
+                    <i class="fas fa-times"></i>
+                </div>
+                <h3>菜单</h3>
+            </div>
+            <div class="menu-items">
+                <button id="statsBtn"><i class="fas fa-chart-line"></i> 统计</button>
+                <button id="settingsBtn" class="active"><i class="fas fa-cog"></i> 设置</button>
+                <button id="aboutBtn"><i class="fas fa-info-circle"></i> 关于</button>
+            </div>
+        </div>
+
+        <!-- 遮罩层 -->
+        <div class="overlay" id="overlay"></div>
+
+        <div class="content">
+             <!-- 设置页面 -->
+             <div id="settingsPage" class="page active">
+                <h2 class="section-title"><i class="fas fa-sliders-h"></i> 工作参数设置</h2>
+                <form id="workSettings">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="monthlySalary"><i class="fas fa-money-bill-wave"></i> 月薪 (元)</label>
+                            <input type="number" id="monthlySalary" placeholder="输入您的月薪" value="10000" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="workDays"><i class="fas fa-calendar-alt"></i> 每月工作天数</label>
+                            <input type="number" id="workDays" placeholder="输入每月工作天数" value="22" min="1" max="31"
+                                required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="startTime"><i class="fas fa-clock"></i> 上班时间</label>
+                            <input type="time" id="startTime" value="09:00" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="endTime"><i class="fas fa-clock"></i> 下班时间</label>
+                            <input type="time" id="endTime" value="18:00" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="lunchBreak"><i class="fas fa-utensils"></i> 休息时间 (分钟)</label>
+                            <input type="number" id="lunchBreak" placeholder="输入休息时间" value="0" min="0" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="decimalPlaces"><i class="fas fa-percentage"></i> 小数位数显示</label>
+                            <select id="decimalPlaces">
+                                <option value="0">0 (整数)</option>
+                                <option value="1">1 位小数</option>
+                                <option value="2" selected>2 位小数</option>
+                                <option value="3">3 位小数</option>
+                                <option value="4">4 位小数</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group full-width">
+                            <div class="button-group">
+                                <button type="submit"><i class="fas fa-save"></i> 保存设置并计算</button>
+                                <button type="button" id="generateLinkBtn" class="generate-link-btn"><i
+                                        class="fas fa-link"></i> 生成分享链接</button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+
+                <!-- 分享链接区域 -->
+                <div class="share-container" id="shareContainer" style="display: none;">
+                    <div class="share-title">
+                        <i class="fas fa-share-alt"></i> 分享链接
+                    </div>
+                    <div class="share-link-container">
+                        <div class="share-link" id="shareLink" title="点击复制链接"></div>
+                        <button class="copy-btn" id="copyLinkBtn"><i class="fas fa-copy"></i> 复制</button>
+                    </div>
+                    <div class="share-tip">
+                        <i class="fas fa-info-circle"></i> 分享此链接给同事，他们可以直接查看相同配置的收入统计
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        <footer>
+            <p>
+                <strong>版权声明</strong>：
+                本网站所有内容版权归 <a href="https://rensr.site" rel="noopener">任尚仁</a> 所有
+            </p>
+        </footer>
+    </div>
+
+    <!-- 自定义弹窗 -->
+    <div class="custom-alert" id="customAlert">
+        <div class="alert-content">
+            <div class="alert-icon">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <h3 class="alert-title">成功</h3>
+            <p class="alert-message" id="alertMessage">操作已完成</p>
+            <button class="alert-button" id="alertButton">确定</button>
+        </div>
+    </div>
+
+    <script type="module" src="js/setting-main.js"></script>
+</body>
+
+</html>

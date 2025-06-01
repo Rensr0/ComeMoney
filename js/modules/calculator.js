@@ -71,9 +71,20 @@ export function calculateRates() {
     
     // 处理当前时间，考虑夜班情况
     let adjustedCurrentSeconds = currentSeconds;
-    if (isNightShift(config.startTime, config.endTime) && currentSeconds < workStartSeconds && currentSeconds < workEndSeconds - 24 * 60 * 60) {
-        // 如果是夜班，且当前时间在零点后、下班时间前，需要加上24小时
-        adjustedCurrentSeconds += 24 * 60 * 60;
+    if (isNightShift(config.startTime, config.endTime)) {
+        // 如果当前时间小于上班时间并且小于下班时间，说明在第二天凌晨
+        if (currentSeconds < workStartSeconds && currentSeconds < (workEndSeconds - 24 * 60 * 60)) {
+            // 如果是夜班，且当前时间在零点后、下班时间前，需要加上24小时
+            adjustedCurrentSeconds += 24 * 60 * 60;
+        }
+        // 如果当前时间在上班时间和午夜之间
+        else if (currentSeconds >= workStartSeconds && currentSeconds > (workEndSeconds - 24 * 60 * 60)) {
+            // 当前是上半段工作时间，不需要调整
+        }
+        // 如果当前时间在午夜和下班时间之间
+        else if (currentSeconds < workStartSeconds && currentSeconds <= (workEndSeconds - 24 * 60 * 60)) {
+            // 当前是下半段工作时间，已经加过24小时了
+        }
     }
     
     // 如果在工作时间内
@@ -152,9 +163,20 @@ export function calculateTodayEarnings() {
     
     // 处理当前时间，考虑夜班情况
     let adjustedCurrentSeconds = currentSeconds;
-    if (isNightShift(config.startTime, config.endTime) && currentSeconds < workStartSeconds && currentSeconds < workEndSeconds - 24 * 60 * 60) {
-        // 如果是夜班，且当前时间在零点后、下班时间前，需要加上24小时
-        adjustedCurrentSeconds += 24 * 60 * 60;
+    if (isNightShift(config.startTime, config.endTime)) {
+        // 如果当前时间小于上班时间并且小于下班时间，说明在第二天凌晨
+        if (currentSeconds < workStartSeconds && currentSeconds < (workEndSeconds - 24 * 60 * 60)) {
+            // 如果是夜班，且当前时间在零点后、下班时间前，需要加上24小时
+            adjustedCurrentSeconds += 24 * 60 * 60;
+        }
+        // 如果当前时间在上班时间和午夜之间
+        else if (currentSeconds >= workStartSeconds && currentSeconds > (workEndSeconds - 24 * 60 * 60)) {
+            // 当前是上半段工作时间，不需要调整
+        }
+        // 如果当前时间在午夜和下班时间之间
+        else if (currentSeconds < workStartSeconds && currentSeconds <= (workEndSeconds - 24 * 60 * 60)) {
+            // 当前是下半段工作时间，已经加过24小时了
+        }
     }
     
     // 计算已工作秒数（考虑休息）
@@ -233,9 +255,20 @@ export function calculateWorkProgress() {
     
     // 处理当前时间，考虑夜班情况
     let adjustedCurrentSeconds = currentSeconds;
-    if (isNightShift(config.startTime, config.endTime) && currentSeconds < workStartSeconds && currentSeconds < workEndSeconds - 24 * 60 * 60) {
-        // 如果是夜班，且当前时间在零点后、下班时间前，需要加上24小时
-        adjustedCurrentSeconds += 24 * 60 * 60;
+    if (isNightShift(config.startTime, config.endTime)) {
+        // 如果当前时间小于上班时间并且小于下班时间，说明在第二天凌晨
+        if (currentSeconds < workStartSeconds && currentSeconds < (workEndSeconds - 24 * 60 * 60)) {
+            // 如果是夜班，且当前时间在零点后、下班时间前，需要加上24小时
+            adjustedCurrentSeconds += 24 * 60 * 60;
+        }
+        // 如果当前时间在上班时间和午夜之间
+        else if (currentSeconds >= workStartSeconds && currentSeconds > (workEndSeconds - 24 * 60 * 60)) {
+            // 当前是上半段工作时间，不需要调整
+        }
+        // 如果当前时间在午夜和下班时间之间
+        else if (currentSeconds < workStartSeconds && currentSeconds <= (workEndSeconds - 24 * 60 * 60)) {
+            // 当前是下半段工作时间，已经加过24小时了
+        }
     }
     
     // 计算进度百分比
